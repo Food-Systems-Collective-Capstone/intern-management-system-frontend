@@ -1,11 +1,15 @@
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
+import { defineConfig, includeIgnoreFile } from "eslint/config";
+import { fileURLToPath } from "node:url";
 import eslintReact from "@eslint-react/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
+const gitignorePath = fileURLToPath(new URL(".gitignore", import.meta.url));
+
 export default defineConfig([
+  includeIgnoreFile(gitignorePath, { gitignoreResolution: true }),
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     extends: [
