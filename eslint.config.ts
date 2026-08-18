@@ -6,14 +6,15 @@ import eslintReact from "@eslint-react/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig([
-  { files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"], 
+  {
+    files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
       eslintReact.configs["recommended-typescript"],
-      eslintConfigPrettier
-    ], 
-    languageOptions: { 
+      eslintConfigPrettier,
+    ],
+    languageOptions: {
       globals: globals.browser,
       parser: tseslint.parser,
       parserOptions: {
@@ -21,5 +22,6 @@ export default defineConfig([
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
-    } },
+    },
+  },
 ]);
