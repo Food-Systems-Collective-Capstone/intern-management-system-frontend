@@ -9,7 +9,7 @@
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "jest"
+    "test": "vitest"
   },
   "dependencies": {
     "@react-router/node": "^8",
