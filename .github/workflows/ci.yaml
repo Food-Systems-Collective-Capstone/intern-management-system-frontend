@@ -17,7 +17,6 @@ jobs:
       - uses: pnpm/setup@v2
         with:
           runtime: node@26
-          cache: true
 
       - name: Run lint tests
         run: pnpm run lint
@@ -31,7 +30,6 @@ jobs:
       - uses: pnpm/setup@v2
         with:
           runtime: node@26
-          cache: true
 
       - name: Conduct typecheck
         run: pnpm run typecheck
@@ -45,7 +43,6 @@ jobs:
       - uses: pnpm/setup@v2
         with:
           runtime: node@26
-          cache: true
 
       - name: Conduct tests
         run: pnpm run test
@@ -59,7 +56,6 @@ jobs:
       - uses: pnpm/setup@v2
         with:
           runtime: node@26
-          cache: true
 
       - name: Perform build
         run: pnpm run build
