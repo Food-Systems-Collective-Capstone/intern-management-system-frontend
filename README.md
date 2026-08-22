@@ -1,87 +1,51 @@
-# Welcome to React Router!
+## SPECIFICATIONS
 
-A modern, production-ready template for building full-stack React applications using React Router.
+| Technology | Usage | Version |
+| -------- | -------- | -------------- |
+| NodeJS  | Runtime environment | 26 |
+| pnpm  | JS/NodeJS Package manager | 11.22.0 |
+| React | UI Library  | 19 |
+| React-Router | Frontend framework  | 8 |
+| Vite | Build tools, part of React-Router  | 8 |
+| TailwindCSS  | CSS Library | 4 |
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
 
-## Features
+## ENVIRONMENT VARIABLES
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+| VARIABLE | SECRET | VALUE | Description |
+| -------- | -------- | -------------- | ----------- |
+| VITE_API_URL  | No | Deployed URL *("localhost:3000" if running locally)* | URL used to access backend NestJS API |
 
-## Getting Started
+## FRONTEND SETUP
 
-### Installation
+***Ensure you have NodeJS/26 and pnpm/11.22.0 (or version listed in package.json)***
 
-Install the dependencies:
-
-```bash
-npm install
+### Install Node dependencies 
+``` 
+pnpm install
 ```
 
-### Development
-
-Start the development server with HMR:
-
-```bash
-npm run dev
+### Running development server
+Will start the development server at ***http://localhost:5173***
+```
+pnpm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
+### Build the app
+Will produce a ***/build/*** directory containing the package application
+```
+pnpm run build
 ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+## OTHER USEFUL COMMANDS
 ```
+# will run react-router typegen and the TypeScript Compiler
+pnpm run typecheck
 
-The containerized application can be deployed to any platform that supports Docker, including:
+# ESLint shortcuts
+pnpm run lint       # Runs ESLint
+pnpm run lint:fix   # Runs ESLint with --fix parameter
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
+# Running Tests
+pnpm run test       # Runs Vitest
 ```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
