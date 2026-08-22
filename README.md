@@ -18,7 +18,9 @@
 
 ## FRONTEND SETUP 
 
-***Ensure you have NodeJS/26 and pnpm/11.22.0 (or version listed in package.json)***
+*Ensure you have NodeJS/26 and pnpm/11.22.0 (or version listed in package.json)*
+
+*Also create a /.env file in the root directory and fill in necessary variables, found in /.env.example*
 
 ### Install Node dependencies 
 ``` 
