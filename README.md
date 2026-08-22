@@ -14,9 +14,9 @@
 
 | VARIABLE | SECRET | VALUE | Description |
 | -------- | -------- | -------------- | ----------- |
-| VITE_API_URL  | No | Deployed URL *("localhost:3000" if running locally)* | URL used to access backend NestJS API |
+| VITE_API_URL  | No | Deployed URL *("http://localhost:3000" if running locally)* | URL used to access backend NestJS API |
 
-## FRONTEND SETUP
+## FRONTEND SETUP 
 
 ***Ensure you have NodeJS/26 and pnpm/11.22.0 (or version listed in package.json)***
 
@@ -32,7 +32,7 @@ pnpm run dev
 ```
 
 ### Build the app
-Will produce a ***/build/*** directory containing the package application
+Will produce a ***/build/*** directory containing the packaged application
 ```
 pnpm run build
 ```
