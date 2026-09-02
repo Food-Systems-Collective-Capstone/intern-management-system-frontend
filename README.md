@@ -51,3 +51,36 @@ pnpm run lint:fix   # Runs ESLint with --fix parameter
 # Running Tests
 pnpm run test       # Runs Vitest
 ```
+
+## CI/CD Process
+
+The current CI/CD pipeline is as follows:
+```
+    Developer runs tests locally
+                |
+                V
+            Tests pass
+                |
+                V
+Developer pushes to feature branch -----------> Commits to any non-main branch
+                |                               trigger deployment to Vercel's
+                |                               preview environment via its GitHub integration, 
+                |                               generating a unique URL for each commit                              
+                |
+                V                               
+        Pull request to Main
+                |
+                V
+    GitHub Workflows runs test suite
+     and creates the build artifact 
+        on worker instance
+                |
+                V
+        Builds and tests pass
+                |
+                V
+        Merge changes to main ---------------> Changes to the main branch trigger
+                                               a deployment to Vercel's production
+                                               environment via its GitHub integration, 
+                                               updating the live website
+```
