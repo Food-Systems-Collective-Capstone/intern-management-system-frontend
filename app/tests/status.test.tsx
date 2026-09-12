@@ -19,6 +19,9 @@ describe("Status", () => {
   });
 
   it("shows available when the API responds successfully", async () => {
+    // mocks console logs to prevent outputting to stdout
+    vi.spyOn(console, "log").mockImplementation(() => {});
+
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       status: 200,
@@ -31,6 +34,9 @@ describe("Status", () => {
   });
 
   it("shows unavailable when the API returns a non-200 response", async () => {
+    // mocks console errors to prevent outputting to stderr
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 500,
@@ -42,6 +48,9 @@ describe("Status", () => {
   });
 
   it("shows unavailable when the API request fails", async () => {
+    // mocks console errors to prevent outputting to stderr
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
 
     render(<Status />);
