@@ -1,9 +1,14 @@
-import { type RouteConfig, 
-    index,
-    route
+import {
+  type RouteConfig,
+  index,
+  route,
 } from "@react-router/dev/routes";
 
 export default [
-    index("routes/home.tsx"),
-    route("status", "./routes/status.tsx")
+  index("routes/home.tsx"),
+  route("status", "./routes/status.tsx"),
+  route(
+    "mentor/tasks/assign",
+    "./routes/mentor-task-assignment.tsx",
+  ),
 ] satisfies RouteConfig;
