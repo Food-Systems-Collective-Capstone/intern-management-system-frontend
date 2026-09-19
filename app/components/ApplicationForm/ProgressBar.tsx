@@ -3,10 +3,7 @@ type ProgressBarProps = {
   steps: string[];
 };
 
-export function ProgressBar({
-  currentStep,
-  steps,
-}: ProgressBarProps) {
+export function ProgressBar({ currentStep, steps }: ProgressBarProps) {
   return (
     <div className="flex items-center justify-between">
       {steps.map((step, index) => (
@@ -22,17 +19,13 @@ export function ProgressBar({
               {index + 1}
             </div>
 
-            <span className="mt-2 text-sm">
-              {step}
-            </span>
+            <span className="mt-2 text-sm">{step}</span>
           </div>
 
           {index < steps.length - 1 && (
             <div
               className={`mx-2 h-1 flex-1 ${
-                index < currentStep
-                  ? "bg-blue-600"
-                  : "bg-gray-200"
+                index < currentStep ? "bg-blue-600" : "bg-gray-200"
               }`}
             />
           )}
