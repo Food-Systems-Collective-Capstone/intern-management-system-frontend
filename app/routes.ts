@@ -11,4 +11,12 @@ export default [
     "mentor/tasks/assign",
     "./routes/mentor-task-assignment.tsx",
   ),
+  route(
+    "intern/tasks",
+    "./routes/intern-tasks.tsx",
+  ),
+  route(
+    "intern/tasks/:taskId",
+    "./routes/intern-task-detail.tsx",
+  ),
 ] satisfies RouteConfig;
