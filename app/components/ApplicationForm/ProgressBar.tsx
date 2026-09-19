@@ -11,7 +11,7 @@ export function ProgressBar({ currentStep, steps }: ProgressBarProps) {
           <div className="flex flex-col items-center">
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                index <= currentStep
+                index == currentStep
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-600"
               }`}
