@@ -31,6 +31,7 @@ export function Footer({
       <div>
         {isLastStep ? (
           <button
+            key="submitbutton"
             type="submit"
             className="rounded bg-blue-600 px-4 py-2 text-white"
           >
@@ -38,6 +39,7 @@ export function Footer({
           </button>
         ) : (
           <button
+            key="continuebutton"
             type="button"
             onClick={onNext}
             className="rounded bg-blue-600 px-4 py-2 text-white"
