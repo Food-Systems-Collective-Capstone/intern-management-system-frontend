@@ -88,16 +88,16 @@ export function ApplicationForm() {
     }
   }
 
-  function handleEdit(step: number) {
-    setCurrentStep(step);
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    // Currently doesn't do much, will implement proper functionality later.
+    event.preventDefault();
+
+    console.log(formData);
   }
 
   return (
-    <form>
-        <ProgressBar
-            currentStep={currentStep}
-            steps={steps}
-        />
+    <form onSubmit={handleSubmit}>
+      <ProgressBar currentStep={currentStep} steps={steps} />
       {currentStep === 0 && (
         <PersonalInfo data={formData} onChange={handleChange} />
       )}
@@ -113,7 +113,7 @@ export function ApplicationForm() {
         />
       )}
 
-      {currentStep === 3 && <Review data={formData} onEdit={setCurrentStep} />}
+      {currentStep === 3 && <Review data={formData} />}
       <Footer
         currentStep={currentStep}
         totalSteps={steps.length}
