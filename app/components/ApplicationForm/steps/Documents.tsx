@@ -17,8 +17,8 @@ export function Documents({
   setValue,
   errors,
 }: DocumentsProps) {
-  const resumeInput = useRef<HTMLInputElement>(null);
-  const coverLetterInput = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const coverLetterInputRef = useRef<HTMLInputElement>(null);
 
   function setResume(file?: File) {
     if (!file) return;
@@ -68,14 +68,14 @@ export function Documents({
 
           <button
             type="button"
-            onClick={() => resumeInput.current?.click()}
+            onClick={() => resumeInputRef.current?.click()}
             className="min-h-[42px] min-w-[155px] rounded-[5px] bg-[#3f3d3d] px-[18px] font-semibold text-white hover:opacity-80"
           >
             Choose a file
           </button>
 
           <input
-            ref={resumeInput}
+            ref={resumeInputRef}
             type="file"
             accept=".pdf,.docx"
             className="hidden"
@@ -118,14 +118,14 @@ export function Documents({
 
         <button
           type="button"
-          onClick={() => coverLetterInput.current?.click()}
+          onClick={() => coverLetterInputRef.current?.click()}
           className="mt-2 min-h-[42px] rounded-[5px] border border-gray-300 bg-gray-100 px-[18px] font-semibold hover:opacity-80"
         >
           Choose a file
         </button>
 
         <input
-          ref={coverLetterInput}
+          ref={coverLetterInputRef}
           type="file"
           accept=".pdf,.docx"
           className="hidden"
