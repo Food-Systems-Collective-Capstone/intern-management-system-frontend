@@ -21,7 +21,7 @@ export function Footer({
           <button
             type="button"
             onClick={onBack}
-            className="rounded border px-4 py-2"
+            className="rounded border px-4 py-2 hover:opacity-82"
           >
             Back
           </button>
@@ -33,7 +33,7 @@ export function Footer({
           <button
             key="submitbutton"
             type="submit"
-            className="rounded bg-blue-600 px-4 py-2 text-white"
+            className="rounded bg-[#111] px-4 py-2 text-white hover:opacity-82"
           >
             Submit Application
           </button>
@@ -42,9 +42,9 @@ export function Footer({
             key="continuebutton"
             type="button"
             onClick={onNext}
-            className="rounded bg-blue-600 px-4 py-2 text-white"
+            className="rounded bg-[#111] px-4 py-2 text-white hover:opacity-82"
           >
-            Continue
+            Save & Continue
           </button>
         )}
       </div>
