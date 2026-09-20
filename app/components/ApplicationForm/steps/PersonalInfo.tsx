@@ -11,13 +11,6 @@ type PersonalInfoProps = {
 const inputStyle =
   "h-[42px] w-full rounded-[5px] border bg-white px-3 text-sm outline-none focus:ring-2";
 
-const getInputStyle = (hasError: boolean) =>
-  `${inputStyle} ${
-    hasError
-      ? "border-red-500 focus:border-red-500 focus:ring-red-100"
-      : "border-[#aaa] focus:border-black focus:ring-gray-200"
-  }`;
-
 const labelStyle = "text-[13px] font-semibold text-black";
 
 const errorStyle = "mt-1 text-xs text-red-600";
