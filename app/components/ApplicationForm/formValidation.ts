@@ -2,18 +2,20 @@ import { z } from "zod";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+const ALLOWED_FILE_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
 export const applicationSchema = z.object({
   // Personal Information section
-  fullName: z
-  .string()
-  .trim()
-  .min(1, "Please fill out section"),
+  fullName: z.string().trim().min(1, "Please fill out section"),
 
-email: z
-  .string()
-  .trim()
-  .min(1, "Please fill out section")
-  .email("Please enter a valid email"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Please fill out section")
+    .email("Please enter a valid email"),
 
   phone: z.string().trim().min(1, "Phone number is required"),
 
@@ -44,16 +46,24 @@ email: z
     .nullable()
     .refine((file) => file !== null, "Resume / CV is required")
     .refine(
+      (file) => !file || ALLOWED_FILE_TYPES.includes(file.type),
+      "Please upload a PDF or DOCX file",
+    )
+    .refine(
       (file) => !file || file.size <= MAX_FILE_SIZE,
-      "Resume / CV must be 5MB or smaller",
+      "File must be 5MB or smaller",
     ),
 
   coverLetter: z
     .instanceof(File)
     .nullable()
     .refine(
+      (file) => !file || ALLOWED_FILE_TYPES.includes(file.type),
+      "Please upload a PDF or DOCX file",
+    )
+    .refine(
       (file) => !file || file.size <= MAX_FILE_SIZE,
-      "Cover letter must be 5MB or smaller",
+      "File must be 5MB or smaller",
     ),
 });
 

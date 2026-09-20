@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Footer } from "./Footer";
 import { ProgressBar } from "./ProgressBar";
@@ -8,75 +10,78 @@ import { ApplicationDetails } from "./steps/ApplicationDetails";
 import { Documents } from "./steps/Documents";
 import { Review } from "./steps/Review";
 
-export type ApplicationData = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-
-  university: string;
-  degree: string;
-  graduationYear: string;
-
-  address: string;
-  city: string;
-  state: string;
-  postcode: string;
-
-  motivation: string;
-
-  resume: File | null;
-};
+import {
+  applicationSchema,
+  type ApplicationData,
+  type ApplicationFormData,
+} from "./formValidation";
 
 const steps = [
-  "Personal Information",
+  "Personal Info",
   "Application Details",
   "Documents",
-  "Review",
+  "Review & Submit",
+];
+
+const stepFields: Array<(keyof ApplicationFormData)[]> = [
+  [
+    "fullName",
+    "email",
+    "phone",
+    "address",
+    "city",
+    "state",
+    "postcode",
+    "privacyAccepted",
+  ],
+  ["internshipProgram", "university", "graduationYear", "motivation"],
+  ["resume", "coverLetter"],
+  [],
 ];
 
 export function ApplicationForm() {
   const [currentStep, setCurrentStep] = useState(0);
 
-  const [formData, setFormData] = useState<ApplicationData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    setValue,
+    getValues,
+    watch,
+    formState: { errors },
+  } = useForm<ApplicationFormData, unknown, ApplicationData>({
+    resolver: zodResolver(applicationSchema),
 
-    university: "",
-    degree: "",
-    graduationYear: "",
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      postcode: "",
+      privacyAccepted: false,
 
-    address: "",
-    city: "",
-    state: "",
-    postcode: "",
+      internshipProgram: "",
+      university: "",
+      graduationYear: "",
+      motivation: "",
 
-    motivation: "",
-
-    resume: null,
+      resume: null,
+      coverLetter: null,
+    },
   });
 
-  function handleChange(
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) {
-    const { name, value } = event.target;
+  async function handleNext() {
+    const fields = stepFields[currentStep];
 
-    setFormData((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  }
+    const isValid = await trigger(fields);
 
-  function handleResumeChange(file: File | null) {
-    setFormData((current) => ({
-      ...current,
-      resume: file,
-    }));
-  }
+    if (!isValid) {
+      return;
+    }
 
-  function handleNext() {
     if (currentStep < steps.length - 1) {
       setCurrentStep((current) => current + 1);
     }
@@ -88,32 +93,39 @@ export function ApplicationForm() {
     }
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    // Currently doesn't do much, will implement proper functionality later.
-    event.preventDefault();
-
-    console.log(formData);
+  function onSubmit(data: ApplicationData) {
+    // API integration can be added later.
+    console.log("Application submitted:", data);
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="mx-auto w-full max-w-[1000px] px-4 py-6 sm:px-6"
+    >
       <ProgressBar currentStep={currentStep} steps={steps} />
-      {currentStep === 0 && (
-        <PersonalInfo data={formData} onChange={handleChange} />
-      )}
 
-      {currentStep === 1 && (
-        <ApplicationDetails data={formData} onChange={handleChange} />
-      )}
+      <div className="mt-10">
+        {currentStep === 0 && (
+          <PersonalInfo register={register} errors={errors} />
+        )}
 
-      {currentStep === 2 && (
-        <Documents
-          resume={formData.resume}
-          onResumeChange={handleResumeChange}
-        />
-      )}
+        {currentStep === 1 && (
+          <ApplicationDetails register={register} errors={errors} />
+        )}
 
-      {currentStep === 3 && <Review data={formData} />}
+        {currentStep === 2 && (
+          <Documents
+            resume={watch("resume")}
+            coverLetter={watch("coverLetter")}
+            setValue={setValue}
+            errors={errors}
+          />
+        )}
+
+        {currentStep === 3 && <Review data={getValues()} />}
+      </div>
+
       <Footer
         currentStep={currentStep}
         totalSteps={steps.length}
