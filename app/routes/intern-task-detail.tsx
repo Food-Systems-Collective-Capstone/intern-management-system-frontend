@@ -23,6 +23,24 @@ type AssignmentPerson = {
   name: string;
 };
 
+type SubmissionResponse = {
+  submission: {
+    id: string;
+    task_id: string;
+    submitted_by_intern_id: string;
+    description: string | null;
+    file_url: string | null;
+    created_at: string;
+    updated_at: string;
+    submitted_at: string;
+  };
+  task: {
+    id: string;
+    status: string;
+    updated_at: string;
+  };
+};
+
 const TEST_INTERN_ID = "cd8ac10e-1480-4237-97aa-71120bdcdbd4";
 
 export function meta() {
@@ -72,6 +90,11 @@ export default function InternTaskDetail() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionDescription, setSubmissionDescription] = useState("");
+  const [submissionFile, setSubmissionFile] = useState<File | null>(null);
+  const [submissionError, setSubmissionError] = useState("");
+  const [submissionSuccess, setSubmissionSuccess] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -97,9 +120,7 @@ export default function InternTaskDetail() {
         if (!taskResponse.ok) {
           const result = await taskResponse.json().catch(() => null);
 
-          throw new Error(
-            result?.message || "Unable to load task.",
-          );
+          throw new Error(result?.message || "Unable to load task.");
         }
 
         const taskResult: Task = await taskResponse.json();
@@ -144,9 +165,7 @@ export default function InternTaskDetail() {
       if (!response.ok) {
         const result = await response.json().catch(() => null);
 
-        throw new Error(
-          result?.message || "Unable to start task.",
-        );
+        throw new Error(result?.message || "Unable to start task.");
       }
 
       const updatedTask: Task = await response.json();
@@ -157,6 +176,72 @@ export default function InternTaskDetail() {
       );
     } finally {
       setStarting(false);
+    }
+  }
+
+  async function handleSubmitTask() {
+    if (!taskId || !task) {
+      return;
+    }
+
+    setSubmissionError("");
+    setSubmissionSuccess("");
+
+    if (!submissionDescription.trim() && !submissionFile) {
+      setSubmissionError(
+        "Please provide a submission description or attach a file.",
+      );
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const formData = new FormData();
+
+      if (submissionDescription.trim()) {
+        formData.append("description", submissionDescription.trim());
+      }
+
+      if (submissionFile) {
+        formData.append("file", submissionFile);
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/tasks/intern/${TEST_INTERN_ID}/${taskId}/submission`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(result?.message || "Unable to submit task.");
+      }
+
+      const submissionResult = result as SubmissionResponse;
+
+      setTask((currentTask) =>
+        currentTask
+          ? {
+              ...currentTask,
+              status: submissionResult.task.status,
+              updated_at: submissionResult.task.updated_at,
+            }
+          : currentTask,
+      );
+
+      setSubmissionDescription("");
+      setSubmissionFile(null);
+      setSubmissionSuccess("Task submitted successfully.");
+    } catch (err) {
+      setSubmissionError(
+        err instanceof Error ? err.message : "Unable to submit task.",
+      );
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -291,31 +376,98 @@ export default function InternTaskDetail() {
                 </div>
 
                 <p className="mt-4 text-xs leading-5 text-gray-400">
-                  Task status for this flow is limited to Assigned → In
-                  Progress. Submission and completion are handled in later
-                  workflow stages.
+                  Assigned tasks can be started by the Intern. In Progress
+                  tasks can be submitted for Mentor review.
                 </p>
               </section>
 
-              {/* Submission placeholder - not implemented in this task */}
-              <section className="mt-6 flex items-center justify-between rounded-lg border border-gray-300 p-6">
-                <div>
-                  <h2 className="text-lg font-medium">
-                    Task Submission
-                  </h2>
+              {/* Task submission */}
+              <section className="mt-6 rounded-lg border border-gray-300 p-6">
+                <h2 className="text-lg font-medium">Task Submission</h2>
 
-                  <p className="mt-2 text-sm text-gray-400">
-                    Submission is handled in the next implementation stage.
+                {task.status === "Assigned" && (
+                  <p className="mt-2 text-sm text-gray-500">
+                    Start this task before submitting your work.
                   </p>
-                </div>
+                )}
 
-                <button
-                  type="button"
-                  disabled
-                  className="cursor-not-allowed rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-400"
-                >
-                  Add submission
-                </button>
+                {task.status === "In Progress" && (
+                  <div className="mt-5 space-y-5">
+                    <div>
+                      <label
+                        htmlFor="submission-description"
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                      >
+                        Submission description
+                      </label>
+
+                      <textarea
+                        id="submission-description"
+                        value={submissionDescription}
+                        onChange={(event) =>
+                          setSubmissionDescription(event.target.value)
+                        }
+                        rows={5}
+                        placeholder="Describe the work you completed..."
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="submission-file"
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                      >
+                        Attachment
+                      </label>
+
+                      <input
+                        id="submission-file"
+                        type="file"
+                        onChange={(event) =>
+                          setSubmissionFile(
+                            event.target.files?.[0] ?? null,
+                          )
+                        }
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      />
+
+                      <p className="mt-2 text-xs text-gray-400">
+                        Add a description, an attachment, or both.
+                      </p>
+                    </div>
+
+                    {submissionError && (
+                      <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {submissionError}
+                      </div>
+                    )}
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={handleSubmitTask}
+                        disabled={submitting}
+                        className="rounded-md bg-gray-700 px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {submitting ? "Submitting..." : "Submit work"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {task.status === "Submitted" && (
+                  <div className="mt-4 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    {submissionSuccess ||
+                      "This task has been submitted for Mentor review."}
+                  </div>
+                )}
+
+                {task.status === "Completed" && (
+                  <div className="mt-4 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                    This task has been completed.
+                  </div>
+                )}
               </section>
             </>
           )}
