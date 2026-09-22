@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Link } from "react-router";
 
 type FormData = {
   title: string;
@@ -64,7 +65,7 @@ export default function MentorTaskAssignment() {
       }
     }
 
-    loadPeople();
+    void loadPeople();
   }, []);
 
   // Temporary until shared authentication/RBAC provides the signed-in Mentor.
@@ -165,13 +166,19 @@ export default function MentorTaskAssignment() {
 
         {/* Mentor navigation */}
         <nav className="flex gap-2 border-b border-gray-200 bg-gray-50 px-8 py-3">
-          <span className="rounded-xl bg-gray-700 px-4 py-2 text-sm font-medium text-white">
+          <Link
+            to="/mentor/tasks/assign"
+            className="rounded-xl bg-gray-700 px-4 py-2 text-sm font-medium text-white"
+          >
             Assign Task
-          </span>
+          </Link>
 
-          <span className="px-4 py-2 text-sm text-gray-600">
+          <Link
+            to="/mentor/review"
+            className="rounded-xl px-4 py-2 text-sm text-gray-600"
+          >
             Review Progress
-          </span>
+          </Link>
         </nav>
 
         {/* Page */}
