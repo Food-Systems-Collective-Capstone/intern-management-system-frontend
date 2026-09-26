@@ -2,14 +2,11 @@ import { z } from "zod";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-const ALLOWED_FILE_TYPES = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
+const ALLOWED_FILE_TYPES = ["application/pdf"];
 
 export const applicationSchema = z.object({
   // Personal Information section
-  fullName: z.string().trim().min(1, "Please fill out section"),
+  fullName: z.string().trim().refine((value) => value.split(/\s+/).length >= 2, "Please enter your first and last name"),
 
   email: z
     .string()
@@ -47,7 +44,7 @@ export const applicationSchema = z.object({
     .refine((file) => file !== null, "Resume / CV is required")
     .refine(
       (file) => !file || ALLOWED_FILE_TYPES.includes(file.type),
-      "Please upload a PDF or DOCX file",
+      "Please upload a PDF file",
     )
     .refine(
       (file) => !file || file.size <= MAX_FILE_SIZE,
@@ -59,7 +56,7 @@ export const applicationSchema = z.object({
     .nullable()
     .refine(
       (file) => !file || ALLOWED_FILE_TYPES.includes(file.type),
-      "Please upload a PDF or DOCX file",
+      "Please upload a PDF file",
     )
     .refine(
       (file) => !file || file.size <= MAX_FILE_SIZE,
