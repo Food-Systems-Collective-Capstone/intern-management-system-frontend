@@ -6,19 +6,16 @@ import type { ApplicationFormData } from "../formValidation";
 
 type DocumentsProps = {
   resume: File | null;
-  coverLetter: File | null;
   setValue: UseFormSetValue<ApplicationFormData>;
   errors: FieldErrors<ApplicationFormData>;
 };
 
 export function Documents({
   resume,
-  coverLetter,
   setValue,
   errors,
 }: DocumentsProps) {
   const resumeInputRef = useRef<HTMLInputElement>(null);
-  const coverLetterInputRef = useRef<HTMLInputElement>(null);
 
   function setResume(file?: File) {
     if (!file) return;
@@ -29,21 +26,12 @@ export function Documents({
     });
   }
 
-  function setCoverLetter(file?: File) {
-    if (!file) return;
-
-    setValue("coverLetter", file, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  }
-
   return (
     <section>
       <h2 className="text-xl font-bold">Documents</h2>
 
       <p className="mt-1 text-sm">
-        Upload your resume/CV and any other supporting documents
+        Upload your resume/CV as a PDF.
       </p>
 
       {/* Resume */}
@@ -77,13 +65,13 @@ export function Documents({
           <input
             ref={resumeInputRef}
             type="file"
-            accept=".pdf,.docx"
+            accept=".pdf,application/pdf"
             className="hidden"
             onChange={(event) => setResume(event.target.files?.[0])}
           />
 
           <p className="mt-4 w-full text-sm text-gray-500">
-            PDF, DOCX Allowed. Max size 5MB
+            PDF allowed. Max size 5MB
           </p>
         </div>
 
@@ -112,50 +100,7 @@ export function Documents({
         )}
       </div>
 
-      {/* Cover Letter */}
-      <div className="mt-4">
-        <p className="text-[13px] font-semibold">Cover letter (optional)</p>
-
-        <button
-          type="button"
-          onClick={() => coverLetterInputRef.current?.click()}
-          className="mt-2 min-h-[42px] rounded-[5px] border border-gray-300 bg-gray-100 px-[18px] font-semibold hover:opacity-80"
-        >
-          Choose a file
-        </button>
-
-        <input
-          ref={coverLetterInputRef}
-          type="file"
-          accept=".pdf,.docx"
-          className="hidden"
-          onChange={(event) => setCoverLetter(event.target.files?.[0])}
-        />
-
-        {/* Successful cover letter */}
-        {coverLetter && !errors.coverLetter && (
-          <div className="mt-4 flex items-center justify-between rounded-[5px] border border-gray-300 p-3">
-            <div>
-              <p className="text-sm font-semibold">{coverLetter.name}</p>
-
-              <p className="text-xs text-gray-500">
-                {(coverLetter.size / 1024 / 1024).toFixed(2)}MB
-              </p>
-            </div>
-
-            <span className="text-green-600">✓</span>
-          </div>
-        )}
-
-        {/* Cover letter error */}
-        {errors.coverLetter && (
-          <div className="mt-4 rounded-[5px] border border-red-500 p-3">
-            <p className="text-sm font-semibold">File upload error</p>
-
-            <p className="text-xs text-red-500">{errors.coverLetter.message}</p>
-          </div>
-        )}
-      </div>
+      <p className="mt-5 text-sm text-gray-600">Cover letters are not supported by the application service yet.</p>
     </section>
   );
 }
