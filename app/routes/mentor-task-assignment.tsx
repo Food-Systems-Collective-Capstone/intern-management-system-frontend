@@ -1,7 +1,13 @@
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { Link } from "react-router";
 
-type FormData = {
+type TaskFormData = {
   title: string;
   description: string;
   due_date: string;
@@ -18,7 +24,7 @@ type AssignmentPerson = {
   name: string;
 };
 
-const initialForm: FormData = {
+const initialForm: TaskFormData = {
   title: "",
   description: "",
   due_date: "",
@@ -34,12 +40,15 @@ export function meta() {
 }
 
 export default function MentorTaskAssignment() {
-  const [form, setForm] = useState<FormData>(initialForm);
+  const [form, setForm] = useState<TaskFormData>(initialForm);
   const [people, setPeople] = useState<AssignmentPerson[]>([]);
+  const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [loadingPeople, setLoadingPeople] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function loadPeople() {
@@ -68,15 +77,35 @@ export default function MentorTaskAssignment() {
     void loadPeople();
   }, []);
 
-  // Temporary until shared authentication/RBAC provides the signed-in Mentor.
-  // For now PM confirmed we can reuse the existing Team A account/profile data.
-  const currentMentor = people[0] ?? null;
+  // Temporary Team 40 test identities for DEV/integration work.
+  // Final signed-in identity will come from shared authentication/RBAC.
+  const currentMentor =
+    people.find(
+      (person) => person.role.trim().toLowerCase() === "mentor",
+    ) ?? null;
 
-  function updateField(field: keyof FormData, value: string) {
+  const interns = people.filter(
+    (person) => person.role.trim().toLowerCase() === "intern",
+  );
+
+  function updateField(field: keyof TaskFormData, value: string) {
     setForm((current) => ({
       ...current,
       [field]: value,
     }));
+  }
+
+  function handleReferenceFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setReferenceFile(file);
+  }
+
+  function removeReferenceFile() {
+    setReferenceFile(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -104,19 +133,22 @@ export default function MentorTaskAssignment() {
     setSubmitting(true);
 
     try {
+      const payload = new FormData();
+
+      payload.append("title", form.title.trim());
+      payload.append("description", form.description.trim());
+      payload.append("due_date", form.due_date);
+      payload.append("priority", form.priority);
+      payload.append("assigned_intern_id", form.assigned_intern_id);
+      payload.append("assigned_by_mentor_id", currentMentor.id);
+
+      if (referenceFile) {
+        payload.append("reference_file", referenceFile);
+      }
+
       const response = await fetch("http://localhost:3000/tasks", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: form.title.trim(),
-          description: form.description.trim(),
-          due_date: form.due_date,
-          priority: form.priority,
-          assigned_intern_id: form.assigned_intern_id,
-          assigned_by_mentor_id: currentMentor.id,
-        }),
+        body: payload,
       });
 
       if (!response.ok) {
@@ -131,7 +163,7 @@ export default function MentorTaskAssignment() {
 
       await response.json();
 
-      const selectedIntern = people.find(
+      const selectedIntern = interns.find(
         (person) => person.id === form.assigned_intern_id,
       );
 
@@ -140,6 +172,11 @@ export default function MentorTaskAssignment() {
       );
 
       setForm(initialForm);
+      setReferenceFile(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Unable to assign task.",
@@ -152,7 +189,6 @@ export default function MentorTaskAssignment() {
   return (
     <main className="min-h-screen bg-[#171717] p-4 text-gray-900">
       <div className="mx-auto min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-2xl bg-white">
-        {/* Header */}
         <header className="flex items-center justify-between border-b border-gray-500 px-8 py-5">
           <div className="flex h-20 w-20 items-center justify-center bg-gray-200 text-2xl font-bold">
             IMS
@@ -164,7 +200,6 @@ export default function MentorTaskAssignment() {
           </div>
         </header>
 
-        {/* Mentor navigation */}
         <nav className="flex gap-2 border-b border-gray-200 bg-gray-50 px-8 py-3">
           <Link
             to="/mentor/tasks/assign"
@@ -181,14 +216,12 @@ export default function MentorTaskAssignment() {
           </Link>
         </nav>
 
-        {/* Page */}
         <div className="px-10 py-8">
           <div className="mb-8">
             <h1 className="text-xl font-medium">Assign task</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Task title */}
             <div>
               <label className="mb-2 block text-sm text-gray-600">
                 Task title *
@@ -201,7 +234,6 @@ export default function MentorTaskAssignment() {
               />
             </div>
 
-            {/* Description */}
             <div>
               <label className="mb-2 block text-sm text-gray-600">
                 Description *
@@ -216,7 +248,43 @@ export default function MentorTaskAssignment() {
               />
             </div>
 
-            {/* Due date */}
+            <div>
+              <label className="mb-2 block text-sm text-gray-600">
+                Reference file (optional)
+              </label>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleReferenceFile}
+                className="hidden"
+              />
+
+              {!referenceFile ? (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-600 hover:bg-gray-50"
+                >
+                  + Add attachment
+                </button>
+              ) : (
+                <div className="flex items-center justify-between rounded-md border border-gray-300 bg-gray-50 px-4 py-3">
+                  <span className="truncate text-sm text-gray-700">
+                    {referenceFile.name}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={removeReferenceFile}
+                    className="ml-4 text-sm text-red-600 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="mb-2 block text-sm text-gray-600">
                 Due date *
@@ -238,7 +306,6 @@ export default function MentorTaskAssignment() {
               />
             </div>
 
-            {/* Assigned Intern */}
             <div>
               <label className="mb-2 block text-sm text-gray-600">
                 Assigned intern *
@@ -249,16 +316,18 @@ export default function MentorTaskAssignment() {
                 onChange={(e) =>
                   updateField("assigned_intern_id", e.target.value)
                 }
-                disabled={loadingPeople || people.length === 0}
+                disabled={loadingPeople || interns.length === 0}
                 className="w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-3 outline-none focus:border-gray-500 disabled:opacity-50"
               >
                 <option value="">
                   {loadingPeople
                     ? "Loading interns..."
-                    : "Select an intern..."}
+                    : interns.length === 0
+                      ? "No Intern accounts available"
+                      : "Select an intern..."}
                 </option>
 
-                {people.map((person) => (
+                {interns.map((person) => (
                   <option key={person.id} value={person.id}>
                     {person.name}
                   </option>
@@ -266,12 +335,11 @@ export default function MentorTaskAssignment() {
               </select>
 
               <p className="mt-2 text-xs text-gray-400">
-                Account information is loaded from the shared IMS account and
-                profile data.
+                Temporary Team 40 Intern accounts are used for current DEV
+                integration testing.
               </p>
             </div>
 
-            {/* Priority */}
             <div>
               <label className="mb-2 block text-sm text-gray-600">
                 Priority
@@ -295,7 +363,6 @@ export default function MentorTaskAssignment() {
               </div>
             </div>
 
-            {/* Assigned By */}
             <div>
               <label className="mb-2 block text-sm text-gray-600">
                 Assigned by
@@ -306,29 +373,31 @@ export default function MentorTaskAssignment() {
                   ? "Loading..."
                   : currentMentor
                     ? `${currentMentor.name} (you)`
-                    : "No account available"}
+                    : "No Mentor account available"}
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
 
-            {/* Assign button */}
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={submitting || loadingPeople || !currentMentor}
+                disabled={
+                  submitting ||
+                  loadingPeople ||
+                  !currentMentor ||
+                  interns.length === 0
+                }
                 className="rounded-xl bg-gray-700 px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? "Assigning..." : "Assign task"}
               </button>
             </div>
 
-            {/* Success */}
             {success && (
               <div className="rounded-md border border-green-300 bg-green-50 px-4 py-4 text-sm text-green-700">
                 ✓ {success}

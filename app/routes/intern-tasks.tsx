@@ -14,7 +14,7 @@ type Task = {
   updated_at: string;
 };
 
-const TEST_INTERN_ID = "cd8ac10e-1480-4237-97aa-71120bdcdbd4";
+const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
 
 export function meta() {
   return [
@@ -68,7 +68,6 @@ export default function InternTasks() {
   return (
     <main className="min-h-screen bg-[#171717] p-5 text-black">
       <div className="mx-auto min-h-[700px] max-w-5xl overflow-hidden rounded-2xl bg-white">
-        {/* Header */}
         <header className="flex items-center justify-between border-b-2 border-[#747474] px-7 py-4">
           <div className="flex h-[71px] w-[71px] items-center justify-center bg-[#d9d9d9] text-xl font-semibold">
             IMS
@@ -82,10 +81,9 @@ export default function InternTasks() {
           </div>
         </header>
 
-        {/* Navigation */}
         <nav className="flex gap-2 border-b border-gray-300 bg-gray-50 px-7 py-2">
           <Link
-            to="/"
+            to="/intern/workspace"
             className="rounded-lg px-4 py-2 text-sm text-gray-600"
           >
             Workspace
@@ -98,12 +96,14 @@ export default function InternTasks() {
             My Tasks
           </Link>
 
-          <span className="cursor-default rounded-lg px-4 py-2 text-sm text-gray-600">
+          <Link
+            to="/intern/weekly-progress"
+            className="rounded-lg px-4 py-2 text-sm text-gray-600"
+          >
             Weekly Progress
-          </span>
+          </Link>
         </nav>
 
-        {/* Content */}
         <section className="px-8 py-8">
           <h1 className="mb-5 text-xl font-medium">My Tasks</h1>
 

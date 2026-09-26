@@ -6,6 +6,8 @@ export default [
   route("application", "./routes/applicationForm.tsx"),
   route("mentor/tasks/assign", "./routes/mentor-task-assignment.tsx"),
   route("mentor/review", "./routes/mentor-review-progress.tsx"),
+  route("intern/workspace", "./routes/intern-workspace.tsx"),
   route("intern/tasks", "./routes/intern-tasks.tsx"),
   route("intern/tasks/:taskId", "./routes/intern-task-detail.tsx"),
+  route("intern/weekly-progress", "./routes/intern-weekly-progress.tsx"),
 ] satisfies RouteConfig;
