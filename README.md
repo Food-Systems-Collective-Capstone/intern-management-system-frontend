@@ -15,6 +15,14 @@
 | VARIABLE | SECRET | VALUE | Description |
 | -------- | -------- | -------------- | ----------- |
 | VITE_API_URL  | No | Deployed URL *("http://localhost:3000" if running locally)* | URL used to access backend NestJS API |
+| VITE_SUPABASE_URL | No | Supabase project URL | Used by the sign-in and registration pages |
+| VITE_SUPABASE_ANON_KEY | No | Supabase publishable key (or legacy anon key) | Public key used for browser authentication; do not use a secret/service_role key |
+
+The sign-in and registration pages are at `/sign-in` and `/register`. Set the two
+Supabase variables in `.env` before running the app. 
+
+The backend needs to provision a `shared_accounts` row for each registered
+Supabase user before its application POST endpoint will accept them.
 
 ## FRONTEND SETUP 
 
