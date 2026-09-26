@@ -10,6 +10,9 @@ type Task = {
   priority: string | null;
   assigned_intern_id: string;
   assigned_by_mentor_id: string;
+  reference_file_url: string | null;
+  reference_file_name: string | null;
+  reference_attachment_url: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -41,7 +44,7 @@ type SubmissionResponse = {
   };
 };
 
-const TEST_INTERN_ID = "cd8ac10e-1480-4237-97aa-71120bdcdbd4";
+const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
 
 export function meta() {
   return [
@@ -169,7 +172,19 @@ export default function InternTaskDetail() {
       }
 
       const updatedTask: Task = await response.json();
-      setTask(updatedTask);
+
+      setTask((currentTask) =>
+        currentTask
+          ? {
+              ...currentTask,
+              ...updatedTask,
+              reference_file_url: currentTask.reference_file_url,
+              reference_file_name: currentTask.reference_file_name,
+              reference_attachment_url:
+                currentTask.reference_attachment_url,
+            }
+          : updatedTask,
+      );
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Unable to start task.",
@@ -259,7 +274,6 @@ export default function InternTaskDetail() {
   return (
     <main className="min-h-screen bg-[#171717] p-4 text-gray-900">
       <div className="mx-auto min-h-[calc(100vh-2rem)] max-w-6xl overflow-hidden rounded-2xl bg-white">
-        {/* Header */}
         <header className="flex items-center justify-between border-b border-gray-500 px-8 py-5">
           <div className="flex h-20 w-20 items-center justify-center bg-gray-200 text-2xl font-bold">
             IMS
@@ -271,11 +285,13 @@ export default function InternTaskDetail() {
           </div>
         </header>
 
-        {/* Intern navigation */}
         <nav className="flex gap-2 border-b border-gray-200 bg-gray-50 px-8 py-3">
-          <span className="px-4 py-2 text-sm text-gray-600">
+          <Link
+            to="/intern/workspace"
+            className="px-4 py-2 text-sm text-gray-600"
+          >
             Workspace
-          </span>
+          </Link>
 
           <Link
             to="/intern/tasks"
@@ -284,13 +300,15 @@ export default function InternTaskDetail() {
             My Tasks
           </Link>
 
-          <span className="px-4 py-2 text-sm text-gray-600">
+          <Link
+            to="/intern/weekly-progress"
+            className="px-4 py-2 text-sm text-gray-600"
+          >
             Weekly Progress
-          </span>
+          </Link>
         </nav>
 
         <div className="px-10 py-8">
-          {/* Back */}
           <Link
             to="/intern/tasks"
             className="mb-5 inline-block rounded-lg border border-gray-400 bg-gray-50 px-4 py-2 text-sm font-medium hover:bg-gray-100"
@@ -298,68 +316,73 @@ export default function InternTaskDetail() {
             ← My Tasks
           </Link>
 
-          <div className="mb-6">
-            <h1 className="text-xl font-medium">Task Detail</h1>
-          </div>
+          <h1 className="mb-6 text-2xl font-semibold">Task Detail</h1>
 
           {loading && (
-            <div className="rounded-lg border border-gray-200 p-8 text-sm text-gray-500">
-              Loading task...
-            </div>
+            <p className="text-sm text-gray-500">Loading task...</p>
           )}
 
           {error && (
-            <div className="mb-5 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
           {!loading && task && (
             <>
-              {/* Task information */}
-              <section className="rounded-lg border border-gray-300 p-6">
-                <p className="mb-2 text-sm text-gray-400">
-                  {task.id.slice(0, 8)}
-                </p>
+              <section className="rounded-xl border border-gray-300 p-6">
+                <div className="mb-5">
+                  <p className="mb-2 text-xs text-gray-400">
+                    {task.id.slice(0, 8)}
+                  </p>
 
-                <h2 className="mb-4 text-xl font-medium">
-                  {task.title}
-                </h2>
+                  <h2 className="text-xl font-semibold">{task.title}</h2>
+                </div>
 
-                <p className="mb-5 max-w-4xl text-sm leading-6 text-gray-600">
+                <p className="mb-6 text-sm text-gray-700">
                   {task.description || "No description provided."}
                 </p>
 
-                <div className="mb-5 space-y-1 text-sm text-gray-500">
-                  <p>
-                    Due{" "}
-                    <span className="text-gray-700">
-                      {formatDate(task.due_date)}
-                    </span>
-                  </p>
-
-                  <p>
-                    Assigned by{" "}
-                    <span className="text-gray-700">
-                      {assignedByName}
-                    </span>
-                  </p>
+                <div className="mb-5 space-y-2 text-sm text-gray-600">
+                  <p>Due {formatDate(task.due_date)}</p>
+                  <p>Assigned by {assignedByName}</p>
                 </div>
+
+                {task.reference_file_url && (
+                  <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      Reference attachment
+                    </p>
+
+                    {task.reference_attachment_url ? (
+                      <a
+                        href={task.reference_attachment_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                      >
+                        {task.reference_file_name || "Open attachment"}
+                      </a>
+                    ) : (
+                      <p className="text-sm text-gray-500">
+                        Attachment unavailable
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap gap-3">
-                    <span className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm">
+                    <span className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm">
                       {task.status}
                     </span>
 
                     <span
-                      className={`rounded-md border px-3 py-2 text-sm ${priorityClasses(
+                      className={`rounded-lg border px-4 py-2 text-sm ${priorityClasses(
                         task.priority,
                       )}`}
                     >
-                      {task.priority
-                        ? `${task.priority} priority`
-                        : "No priority"}
+                      {task.priority || "No"} priority
                     </span>
                   </div>
 
@@ -368,104 +391,101 @@ export default function InternTaskDetail() {
                       type="button"
                       onClick={handleStartTask}
                       disabled={starting}
-                      className="rounded-md bg-gray-700 px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg bg-gray-700 px-5 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {starting ? "Starting..." : "Start task"}
                     </button>
                   )}
                 </div>
 
-                <p className="mt-4 text-xs leading-5 text-gray-400">
+                <p className="mt-4 text-xs text-gray-400">
                   Assigned tasks can be started by the Intern. In Progress
                   tasks can be submitted for Mentor review.
                 </p>
               </section>
 
-              {/* Task submission */}
-              <section className="mt-6 rounded-lg border border-gray-300 p-6">
-                <h2 className="text-lg font-medium">Task Submission</h2>
+              <section className="mt-6 rounded-xl border border-gray-300 p-6">
+                <h2 className="mb-3 text-lg font-semibold">
+                  Task Submission
+                </h2>
 
                 {task.status === "Assigned" && (
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="text-sm text-gray-500">
                     Start this task before submitting your work.
                   </p>
                 )}
 
                 {task.status === "In Progress" && (
-                  <div className="mt-5 space-y-5">
+                  <div className="space-y-5">
                     <div>
-                      <label
-                        htmlFor="submission-description"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
                         Submission description
                       </label>
 
                       <textarea
-                        id="submission-description"
                         value={submissionDescription}
                         onChange={(event) =>
                           setSubmissionDescription(event.target.value)
                         }
-                        rows={5}
                         placeholder="Describe the work you completed..."
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-500"
+                        className="min-h-32 w-full resize-y rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-gray-500"
                       />
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="submission-file"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Attachment
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Attach file
                       </label>
 
                       <input
-                        id="submission-file"
                         type="file"
                         onChange={(event) =>
                           setSubmissionFile(
                             event.target.files?.[0] ?? null,
                           )
                         }
-                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm"
                       />
 
-                      <p className="mt-2 text-xs text-gray-400">
-                        Add a description, an attachment, or both.
-                      </p>
+                      {submissionFile && (
+                        <p className="mt-2 text-xs text-gray-500">
+                          Selected: {submissionFile.name}
+                        </p>
+                      )}
                     </div>
 
                     {submissionError && (
-                      <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
                         {submissionError}
                       </div>
                     )}
 
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={handleSubmitTask}
-                        disabled={submitting}
-                        className="rounded-md bg-gray-700 px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {submitting ? "Submitting..." : "Submit work"}
-                      </button>
-                    </div>
+                    {submissionSuccess && (
+                      <div className="rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700">
+                        ✓ {submissionSuccess}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleSubmitTask}
+                      disabled={submitting}
+                      className="rounded-lg bg-gray-700 px-5 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {submitting ? "Submitting..." : "Submit task"}
+                    </button>
                   </div>
                 )}
 
                 {task.status === "Submitted" && (
-                  <div className="mt-4 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700">
-                    {submissionSuccess ||
-                      "This task has been submitted for Mentor review."}
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                    ✓ This task has been submitted for Mentor review.
                   </div>
                 )}
 
                 {task.status === "Completed" && (
-                  <div className="mt-4 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                    This task has been completed.
+                  <div className="rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    ✓ This task has been marked Completed.
                   </div>
                 )}
               </section>
