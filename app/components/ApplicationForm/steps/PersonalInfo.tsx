@@ -2,6 +2,7 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
 import type { ApplicationFormData } from "../formValidation";
 import { Input } from "../../Input";
+import { Dropdown } from "../../Dropdown";
 
 type PersonalInfoProps = {
   register: UseFormRegister<ApplicationFormData>;
@@ -88,31 +89,7 @@ export function PersonalInfo({ register, errors }: PersonalInfoProps) {
           {errors.city && <p className={errorStyle}>{errors.city.message}</p>}
         </div>
 
-        <div>
-          <label htmlFor="state" className={labelStyle}>
-            State *
-          </label>
-
-          <select
-            id="state"
-            {...register("state")}
-            className={`mt-2 ${inputStyle}`}
-          >
-            <option value="" disabled hidden selected>
-              e.g VIC
-            </option>
-            <option value="VIC">VIC</option>
-            <option value="NSW">NSW</option>
-            <option value="QLD">QLD</option>
-            <option value="SA">SA</option>
-            <option value="WA">WA</option>
-            <option value="TAS">TAS</option>
-            <option value="ACT">ACT</option>
-            <option value="NT">NT</option>
-          </select>
-
-          {errors.state && <p className={errorStyle}>{errors.state.message}</p>}
-        </div>
+        <Dropdown label="State *" id="state" placeholder="e.g VIC" options={["VIC", "NSW", "QLD", "SA", "WA", "TAS", "ACT", "NT"].map((value) => ({ value, label: value }))} error={errors.state?.message} {...register("state")} />
 
         <div>
           <label htmlFor="postcode" className={labelStyle}>

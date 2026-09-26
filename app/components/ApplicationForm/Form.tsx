@@ -9,6 +9,8 @@ import { PersonalInfo } from "./steps/PersonalInfo";
 import { ApplicationDetails } from "./steps/ApplicationDetails";
 import { Documents } from "./steps/Documents";
 import { Review } from "./steps/Review";
+import { createApplication, uploadResume } from "~/lib/applications";
+import { Link } from "react-router";
 
 import {
   applicationSchema,
@@ -41,6 +43,10 @@ const stepFields: Array<(keyof ApplicationFormData)[]> = [
 
 export function ApplicationForm() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const {
     register,
@@ -93,10 +99,22 @@ export function ApplicationForm() {
     }
   }
 
-  function onSubmit(data: ApplicationData) {
-    // API integration can be added later.
-    console.log("Application submitted:", data);
+  async function onSubmit(data: ApplicationData) {
+    setSubmitting(true);
+    setSubmissionError("");
+    try {
+      const id = savedId ?? await createApplication(data);
+      setSavedId(id);
+      await uploadResume(id, data.resume!);
+      setSubmitted(true);
+    } catch (error) {
+      setSubmissionError(error instanceof Error ? error.message : "Unable to submit application.");
+    } finally {
+      setSubmitting(false);
+    }
   }
+
+  if (submitted) return <div role="status" className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-bold">Application submitted</h1><p className="mt-2">Your details and resume were received.</p></div>;
 
   return (
     <form
@@ -117,7 +135,6 @@ export function ApplicationForm() {
         {currentStep === 2 && (
           <Documents
             resume={watch("resume")}
-            coverLetter={watch("coverLetter")}
             setValue={setValue}
             errors={errors}
           />
@@ -126,11 +143,14 @@ export function ApplicationForm() {
         {currentStep === 3 && <Review data={getValues()} />}
       </div>
 
+      {submissionError && <p role="alert" className="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">{submissionError} {submissionError.includes("session") && <Link to="/sign-in?next=%2Fapplication" className="underline">Sign in</Link>}</p>}
+
       <Footer
         currentStep={currentStep}
         totalSteps={steps.length}
         onBack={handleBack}
         onNext={handleNext}
+        submitting={submitting}
       />
     </form>
   );
