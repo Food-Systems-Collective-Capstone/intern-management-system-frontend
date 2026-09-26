@@ -24,6 +24,13 @@ export async function getAccessToken(): Promise<string | null> {
   return data.session?.access_token ?? null;
 }
 
+export async function hasValidSession(): Promise<boolean> {
+  const token = await getAccessToken();
+  if (!token) return false;
+  const { data, error } = await getSupabaseClient().auth.getUser();
+  return !error && !!data.user;
+}
+
 export async function signOut(): Promise<void> {
   const { error } = await getSupabaseClient().auth.signOut();
   if (error) throw error;

@@ -1,10 +1,9 @@
 import { redirect } from "react-router";
 import { ApplicationForm } from "~/components/ApplicationForm/Form";
-import { getAccessToken } from "~/lib/auth";
+import { hasValidSession } from "~/lib/auth";
 
 export async function clientLoader() {
-  const token = await getAccessToken();
-  if (!token) throw redirect("/sign-in");
+  if (!(await hasValidSession())) throw redirect("/sign-in?next=%2Fapplication");
   return null;
 }
 
