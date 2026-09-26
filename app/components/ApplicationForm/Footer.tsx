@@ -3,6 +3,7 @@ type FooterProps = {
   totalSteps: number;
   onBack: () => void;
   onNext: () => void;
+  submitting?: boolean;
 };
 
 export function Footer({
@@ -10,6 +11,7 @@ export function Footer({
   totalSteps,
   onBack,
   onNext,
+  submitting = false,
 }: FooterProps) {
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
@@ -33,9 +35,10 @@ export function Footer({
           <button
             key="submitbutton"
             type="submit"
+            disabled={submitting}
             className="rounded bg-[#111] px-4 py-2 text-white hover:opacity-82"
           >
-            Submit Application
+            {submitting ? "Submitting…" : "Submit Application"}
           </button>
         ) : (
           <button
