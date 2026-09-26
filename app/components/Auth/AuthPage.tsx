@@ -1,10 +1,11 @@
 import { useState, type SubmitEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { Input } from "~/components/Input";
 import { register, signIn } from "~/lib/auth";
 
 export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const isRegister = mode === "register";
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,7 +30,8 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
       } else {
         await signIn(email.trim(), password);
       }
-      void navigate("/application", { replace: true });
+      const next = params.get("next") || "/application";
+      void navigate(next.startsWith("/") && !next.startsWith("//") ? next : "/application", { replace: true });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Something went wrong. Please try again.");
     } finally {
@@ -71,7 +73,7 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
 
           <p className="mt-6 text-center text-sm text-slate-600">
             {isRegister ? "Already have an account? " : "New here? "}
-            <Link className="font-semibold text-slate-900 underline underline-offset-4" to={isRegister ? "/sign-in" : "/register"}>
+            <Link className="font-semibold text-slate-900 underline underline-offset-4" to={`${isRegister ? "/sign-in" : "/register"}${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`}>
               {isRegister ? "Sign in" : "Create an account"}
             </Link>
           </p>
