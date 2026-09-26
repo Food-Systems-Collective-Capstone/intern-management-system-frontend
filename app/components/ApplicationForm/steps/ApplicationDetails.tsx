@@ -1,6 +1,7 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
 import type { ApplicationFormData } from "../formValidation";
+import { Dropdown } from "../../Dropdown";
 
 type ApplicationDetailsProps = {
   register: UseFormRegister<ApplicationFormData>;
@@ -29,16 +30,12 @@ export function ApplicationDetails({
           Internship Program *
         </label>
 
-        <select
+        <input
           id="internshipProgram"
+          placeholder="e.g. Food safety"
           {...register("internshipProgram")}
           className={`mt-2 ${inputStyle}`}
-        >
-          <option value="" disabled hidden selected>
-            Select a program
-          </option>
-          <option value="placeholder">Placeholder</option>
-        </select>
+        />
 
         {errors.internshipProgram && (
           <p className={errorStyle}>{errors.internshipProgram.message}</p>
@@ -63,30 +60,7 @@ export function ApplicationDetails({
           )}
         </div>
 
-        <div>
-          <label htmlFor="graduationYear" className={labelStyle}>
-            Expected Graduation Year *
-          </label>
-
-          <select
-            id="graduationYear"
-            {...register("graduationYear")}
-            className={`mt-2 ${inputStyle}`}
-          >
-            <option value="" disabled hidden selected>
-              e.g 2027
-            </option>
-            <option value="2026">2026</option>
-            <option value="2027">2027</option>
-            <option value="2028">2028</option>
-            <option value="2029">2029</option>
-            <option value="2030">2030</option>
-          </select>
-
-          {errors.graduationYear && (
-            <p className={errorStyle}>{errors.graduationYear.message}</p>
-          )}
-        </div>
+        <Dropdown label="Expected Graduation Year *" id="graduationYear" placeholder="e.g 2027" options={["2026", "2027", "2028", "2029", "2030"].map((value) => ({ value, label: value }))} error={errors.graduationYear?.message} {...register("graduationYear")} />
       </div>
 
       <div className="mt-5">
