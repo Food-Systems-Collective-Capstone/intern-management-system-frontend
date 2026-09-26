@@ -24,6 +24,10 @@ Supabase variables in `.env` before running the app.
 The backend needs to provision a `shared_accounts` row for each registered
 Supabase user before its application POST endpoint will accept them.
 
+The candidate form at `/application` and admin grid at `/admin/applications`
+require a valid Supabase session. Set `VITE_API_URL` to the Render backend's
+base URL; 
+
 ## FRONTEND SETUP 
 
 *Ensure you have NodeJS/26 and pnpm/11.22.0 (or version listed in package.json)*
