@@ -202,10 +202,10 @@ export default function InternTaskDetail() {
     setSubmissionError("");
     setSubmissionSuccess("");
 
-    if (!submissionDescription.trim() && !submissionFile) {
-      setSubmissionError(
-        "Please provide a submission description or attach a file.",
-      );
+    const cleanDescription = submissionDescription.trim();
+
+    if (!cleanDescription) {
+      setSubmissionError("Submission description is required.");
       return;
     }
 
@@ -214,9 +214,7 @@ export default function InternTaskDetail() {
     try {
       const formData = new FormData();
 
-      if (submissionDescription.trim()) {
-        formData.append("description", submissionDescription.trim());
-      }
+      formData.append("description", cleanDescription);
 
       if (submissionFile) {
         formData.append("file", submissionFile);
@@ -419,7 +417,7 @@ export default function InternTaskDetail() {
                   <div className="space-y-5">
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Submission description
+                        Submission description *
                       </label>
 
                       <textarea
@@ -428,13 +426,14 @@ export default function InternTaskDetail() {
                           setSubmissionDescription(event.target.value)
                         }
                         placeholder="Describe the work you completed..."
+                        required
                         className="min-h-32 w-full resize-y rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-gray-500"
                       />
                     </div>
 
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Attach file
+                        Attach file (optional)
                       </label>
 
                       <input
