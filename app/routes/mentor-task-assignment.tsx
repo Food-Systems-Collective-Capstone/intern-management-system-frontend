@@ -218,7 +218,7 @@ export default function MentorTaskAssignment() {
 
         <div className="px-10 py-8">
           <div className="mb-8">
-            <h1 className="text-xl font-medium">Assign task</h1>
+            <h1 className="text-xl font-medium">Assign Task</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

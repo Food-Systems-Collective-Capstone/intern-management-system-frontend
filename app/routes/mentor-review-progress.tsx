@@ -70,12 +70,14 @@ function getPriorityClasses(priority: string | null) {
 
 function getStatusClasses(status: string) {
   switch (status) {
-    case "Submitted":
+    case "Assigned":
+      return "border-gray-300 bg-gray-50 text-gray-600";
+    case "In Progress":
       return "border-blue-300 bg-blue-50 text-blue-700";
+    case "Submitted":
+      return "border-purple-300 bg-purple-50 text-purple-700";
     case "Completed":
       return "border-green-300 bg-green-50 text-green-700";
-    case "In Progress":
-      return "border-amber-300 bg-amber-50 text-amber-700";
     default:
       return "border-gray-300 bg-gray-50 text-gray-600";
   }
@@ -684,8 +686,8 @@ export default function MentorReviewProgress() {
                               className="rounded-xl bg-[#3f3d3d] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {completingTaskId === review.task_id
-                                ? "Marking Completed..."
-                                : "Mark Completed"}
+                                ? "Marking completed..."
+                                : "Mark completed"}
                             </button>
                           </div>
                         )}

@@ -54,15 +54,10 @@ export function meta() {
 }
 
 function formatDate(value: string | null) {
-  if (!value) {
-    return "No due date";
-  }
+  if (!value) return "No due date";
 
   const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "No due date";
-  }
+  if (Number.isNaN(date.getTime())) return "No due date";
 
   return new Intl.DateTimeFormat("en-AU", {
     day: "2-digit",
@@ -84,13 +79,26 @@ function priorityClasses(priority: string | null) {
   }
 }
 
+function getStatusClasses(status: string) {
+  switch (status) {
+    case "Assigned":
+      return "border-gray-300 bg-gray-50 text-gray-600";
+    case "In Progress":
+      return "border-blue-300 bg-blue-50 text-blue-700";
+    case "Submitted":
+      return "border-purple-300 bg-purple-50 text-purple-700";
+    case "Completed":
+      return "border-green-300 bg-green-50 text-green-700";
+    default:
+      return "border-gray-300 bg-gray-50 text-gray-600";
+  }
+}
+
 export default function InternTaskDetail() {
   const { taskId } = useParams();
 
   const [task, setTask] = useState<Task | null>(null);
-  const [assignmentPeople, setAssignmentPeople] = useState<
-    AssignmentPerson[]
-  >([]);
+  const [assignmentPeople, setAssignmentPeople] = useState<AssignmentPerson[]>([]);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -122,7 +130,6 @@ export default function InternTaskDetail() {
 
         if (!taskResponse.ok) {
           const result = await taskResponse.json().catch(() => null);
-
           throw new Error(result?.message || "Unable to load task.");
         }
 
@@ -132,7 +139,6 @@ export default function InternTaskDetail() {
         if (peopleResponse.ok) {
           const peopleResult: AssignmentPerson[] =
             await peopleResponse.json();
-
           setAssignmentPeople(peopleResult);
         } else {
           setAssignmentPeople([]);
@@ -150,9 +156,7 @@ export default function InternTaskDetail() {
   }, [taskId]);
 
   async function handleStartTask() {
-    if (!taskId || !task) {
-      return;
-    }
+    if (!taskId || !task) return;
 
     setStarting(true);
     setError("");
@@ -160,14 +164,11 @@ export default function InternTaskDetail() {
     try {
       const response = await fetch(
         `http://localhost:3000/tasks/intern/${TEST_INTERN_ID}/${taskId}/start`,
-        {
-          method: "PATCH",
-        },
+        { method: "PATCH" },
       );
 
       if (!response.ok) {
         const result = await response.json().catch(() => null);
-
         throw new Error(result?.message || "Unable to start task.");
       }
 
@@ -195,17 +196,16 @@ export default function InternTaskDetail() {
   }
 
   async function handleSubmitTask() {
-    if (!taskId || !task) {
-      return;
-    }
+    if (!taskId || !task) return;
 
     setSubmissionError("");
     setSubmissionSuccess("");
 
-    if (!submissionDescription.trim() && !submissionFile) {
-      setSubmissionError(
-        "Please provide a submission description or attach a file.",
-      );
+    // DEF-01: A description is required, but an attachment is optional.
+    const cleanDescription = submissionDescription.trim();
+
+    if (!cleanDescription) {
+      setSubmissionError("Submission description is required.");
       return;
     }
 
@@ -213,10 +213,7 @@ export default function InternTaskDetail() {
 
     try {
       const formData = new FormData();
-
-      if (submissionDescription.trim()) {
-        formData.append("description", submissionDescription.trim());
-      }
+      formData.append("description", cleanDescription);
 
       if (submissionFile) {
         formData.append("file", submissionFile);
@@ -335,8 +332,9 @@ export default function InternTaskDetail() {
                   <p className="mb-2 text-xs text-gray-400">
                     {task.id.slice(0, 8)}
                   </p>
-
-                  <h2 className="text-xl font-semibold">{task.title}</h2>
+                  <h2 className="text-xl font-semibold">
+                    {task.title}
+                  </h2>
                 </div>
 
                 <p className="mb-6 text-sm text-gray-700">
@@ -373,7 +371,11 @@ export default function InternTaskDetail() {
 
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap gap-3">
-                    <span className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm">
+                    <span
+                      className={`rounded-lg border px-4 py-2 text-sm ${getStatusClasses(
+                        task.status,
+                      )}`}
+                    >
                       {task.status}
                     </span>
 
@@ -399,8 +401,8 @@ export default function InternTaskDetail() {
                 </div>
 
                 <p className="mt-4 text-xs text-gray-400">
-                  Assigned tasks can be started by the Intern. In Progress
-                  tasks can be submitted for Mentor review.
+                  Assigned tasks can be started by the Intern. In
+                  Progress tasks can be submitted for Mentor review.
                 </p>
               </section>
 
@@ -419,7 +421,7 @@ export default function InternTaskDetail() {
                   <div className="space-y-5">
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Submission description
+                        Submission description *
                       </label>
 
                       <textarea
@@ -428,13 +430,14 @@ export default function InternTaskDetail() {
                           setSubmissionDescription(event.target.value)
                         }
                         placeholder="Describe the work you completed..."
+                        required
                         className="min-h-32 w-full resize-y rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-gray-500"
                       />
                     </div>
 
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Attach file
+                        Attach file (optional)
                       </label>
 
                       <input
