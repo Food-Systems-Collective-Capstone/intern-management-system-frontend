@@ -19,7 +19,7 @@ type ApiError = {
 };
 
 const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
 
 export function meta() {
   return [

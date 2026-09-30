@@ -7,6 +7,8 @@ import {
 } from "react";
 import { Link } from "react-router";
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+
 type TaskFormData = {
   title: string;
   description: string;
@@ -54,7 +56,7 @@ export default function MentorTaskAssignment() {
     async function loadPeople() {
       try {
         const response = await fetch(
-          "http://localhost:3000/tasks/assignment-people",
+          `${API_BASE_URL}/tasks/assignment-people`,
         );
 
         if (!response.ok) {
@@ -146,7 +148,7 @@ export default function MentorTaskAssignment() {
         payload.append("reference_file", referenceFile);
       }
 
-      const response = await fetch("http://localhost:3000/tasks", {
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
         method: "POST",
         body: payload,
       });
