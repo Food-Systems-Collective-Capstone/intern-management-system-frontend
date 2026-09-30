@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
@@ -194,7 +195,7 @@ export default function InternWeeklyProgress() {
             <div className="h-[55px] w-[55px] rounded-full bg-[#d9d9d9]" />
 
             <span className="text-xl font-semibold tracking-[-0.4px]">
-              Intern⌄
+              Intern
             </span>
           </div>
         </header>
@@ -223,14 +224,7 @@ export default function InternWeeklyProgress() {
         </nav>
 
         <section className="px-8 py-8">
-          <Link
-            to="/intern/workspace"
-            className="text-sm text-gray-500 transition hover:text-black"
-          >
-            ← Intern Workspace
-          </Link>
-
-          <div className="mt-5">
+          <div>
             <h1 className="text-2xl font-semibold">Weekly Progress</h1>
 
             <p className="mt-2 text-sm text-gray-500">
@@ -243,7 +237,9 @@ export default function InternWeeklyProgress() {
               Reporting week
             </p>
 
-            <p className="mt-1 text-sm font-medium">{reportingWeek}</p>
+            <p className="mt-1 text-sm font-medium">
+              {reportingWeek}
+            </p>
           </div>
 
           {loading && (

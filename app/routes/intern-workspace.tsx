@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
@@ -173,7 +174,7 @@ export default function InternWorkspace() {
             <div className="h-[55px] w-[55px] rounded-full bg-[#d9d9d9]" />
 
             <span className="text-xl font-semibold tracking-[-0.4px]">
-              Intern⌄
+              Intern
             </span>
           </div>
         </header>
@@ -316,18 +317,18 @@ export default function InternWorkspace() {
 
                     {weeklyProgress ? (
                       <span className="rounded-full border border-green-300 bg-green-50 px-3 py-1 text-sm text-green-700">
-                        Submitted
+                        Submitted this week
                       </span>
                     ) : (
                       <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-sm text-amber-700">
-                        Not submitted
+                        Not submitted this week
                       </span>
                     )}
                   </div>
 
                   <p className="mt-6 text-sm text-gray-600">
                     {weeklyProgress
-                      ? "Weekly Progress submitted for this reporting week."
+                      ? "Submitted this week"
                       : "Not submitted this week"}
                   </p>
 

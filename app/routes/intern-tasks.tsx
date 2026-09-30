@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
@@ -29,6 +30,21 @@ function getPriorityClasses(priority: string | null) {
       return "border-red-300 bg-red-50 text-red-700";
     case "Medium":
       return "border-amber-300 bg-amber-50 text-amber-700";
+    default:
+      return "border-gray-300 bg-gray-50 text-gray-600";
+  }
+}
+
+function getStatusClasses(status: string) {
+  switch (status) {
+    case "Assigned":
+      return "border-gray-300 bg-gray-50 text-gray-600";
+    case "In Progress":
+      return "border-blue-300 bg-blue-50 text-blue-700";
+    case "Submitted":
+      return "border-purple-300 bg-purple-50 text-purple-700";
+    case "Completed":
+      return "border-green-300 bg-green-50 text-green-700";
     default:
       return "border-gray-300 bg-gray-50 text-gray-600";
   }
@@ -152,7 +168,11 @@ export default function InternTasks() {
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
-                      <span className="rounded-md border border-gray-300 px-3 py-1 text-sm">
+                      <span
+                        className={`rounded-md border px-3 py-1 text-sm ${getStatusClasses(
+                          task.status,
+                        )}`}
+                      >
                         {task.status}
                       </span>
 
