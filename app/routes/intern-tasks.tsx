@@ -17,6 +17,10 @@ type Task = {
 
 const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
+
 export function meta() {
   return [
     { title: "My Tasks | IMS" },
@@ -59,7 +63,7 @@ export default function InternTasks() {
     async function loadTasks() {
       try {
         const response = await fetch(
-          `http://localhost:3000/tasks/intern/${TEST_INTERN_ID}`,
+          `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}`,
         );
 
         if (!response.ok) {
@@ -191,7 +195,7 @@ export default function InternTasks() {
           )}
 
           <p className="mt-6 text-xs text-gray-400">
-            🔒 Task visibility is scoped to the current Intern.
+            Task visibility is currently based on the temporary test Intern.
           </p>
         </section>
       </div>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+
 type Task = {
   id: string;
   title: string;
@@ -123,9 +125,9 @@ export default function InternTaskDetail() {
       try {
         const [taskResponse, peopleResponse] = await Promise.all([
           fetch(
-            `http://localhost:3000/tasks/intern/${TEST_INTERN_ID}/${taskId}`,
+            `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}`,
           ),
-          fetch("http://localhost:3000/tasks/assignment-people"),
+          fetch(`${API_BASE_URL}/tasks/assignment-people`),
         ]);
 
         if (!taskResponse.ok) {
@@ -163,7 +165,7 @@ export default function InternTaskDetail() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/tasks/intern/${TEST_INTERN_ID}/${taskId}/start`,
+        `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}/start`,
         { method: "PATCH" },
       );
 
@@ -220,7 +222,7 @@ export default function InternTaskDetail() {
       }
 
       const response = await fetch(
-        `http://localhost:3000/tasks/intern/${TEST_INTERN_ID}/${taskId}/submission`,
+        `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}/submission`,
         {
           method: "POST",
           body: formData,

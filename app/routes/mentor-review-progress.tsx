@@ -40,7 +40,7 @@ type WeeklyProgress = {
   updated_at: string;
 };
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
 
 const TEST_MENTOR_EMAIL = "team40.mentor.test@example.com";
 const TEST_INTERN_EMAIL = "team40.intern1.test@example.com";
