@@ -7,7 +7,9 @@ import {
 } from "react";
 import { Link } from "react-router";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 type TaskFormData = {
   title: string;
@@ -55,9 +57,7 @@ export default function MentorTaskAssignment() {
   useEffect(() => {
     async function loadPeople() {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/tasks/assignment-people`,
-        );
+        const response = await fetch(`${API_BASE_URL}/tasks/assignment-people`);
 
         if (!response.ok) {
           throw new Error("Unable to load account information.");
@@ -82,9 +82,8 @@ export default function MentorTaskAssignment() {
   // Temporary Team 40 test identities for DEV/integration work.
   // Final signed-in identity will come from shared authentication/RBAC.
   const currentMentor =
-    people.find(
-      (person) => person.role.trim().toLowerCase() === "mentor",
-    ) ?? null;
+    people.find((person) => person.role.trim().toLowerCase() === "mentor") ??
+    null;
 
   const interns = people.filter(
     (person) => person.role.trim().toLowerCase() === "intern",
@@ -180,9 +179,7 @@ export default function MentorTaskAssignment() {
         fileInputRef.current.value = "";
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unable to assign task.",
-      );
+      setError(err instanceof Error ? err.message : "Unable to assign task.");
     } finally {
       setSubmitting(false);
     }
@@ -243,9 +240,7 @@ export default function MentorTaskAssignment() {
 
               <textarea
                 value={form.description}
-                onChange={(e) =>
-                  updateField("description", e.target.value)
-                }
+                onChange={(e) => updateField("description", e.target.value)}
                 className="min-h-24 w-full resize-y rounded-md border border-gray-300 bg-gray-50 px-4 py-3 outline-none focus:border-gray-500"
               />
             </div>

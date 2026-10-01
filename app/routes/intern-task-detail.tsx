@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 type Task = {
   id: string;
@@ -100,7 +102,9 @@ export default function InternTaskDetail() {
   const { taskId } = useParams();
 
   const [task, setTask] = useState<Task | null>(null);
-  const [assignmentPeople, setAssignmentPeople] = useState<AssignmentPerson[]>([]);
+  const [assignmentPeople, setAssignmentPeople] = useState<AssignmentPerson[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -124,9 +128,7 @@ export default function InternTaskDetail() {
 
       try {
         const [taskResponse, peopleResponse] = await Promise.all([
-          fetch(
-            `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}`,
-          ),
+          fetch(`${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}`),
           fetch(`${API_BASE_URL}/tasks/assignment-people`),
         ]);
 
@@ -139,16 +141,13 @@ export default function InternTaskDetail() {
         setTask(taskResult);
 
         if (peopleResponse.ok) {
-          const peopleResult: AssignmentPerson[] =
-            await peopleResponse.json();
+          const peopleResult: AssignmentPerson[] = await peopleResponse.json();
           setAssignmentPeople(peopleResult);
         } else {
           setAssignmentPeople([]);
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Unable to load task.",
-        );
+        setError(err instanceof Error ? err.message : "Unable to load task.");
       } finally {
         setLoading(false);
       }
@@ -183,15 +182,12 @@ export default function InternTaskDetail() {
               ...updatedTask,
               reference_file_url: currentTask.reference_file_url,
               reference_file_name: currentTask.reference_file_name,
-              reference_attachment_url:
-                currentTask.reference_attachment_url,
+              reference_attachment_url: currentTask.reference_attachment_url,
             }
           : updatedTask,
       );
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unable to start task.",
-      );
+      setError(err instanceof Error ? err.message : "Unable to start task.");
     } finally {
       setStarting(false);
     }
@@ -266,9 +262,7 @@ export default function InternTaskDetail() {
     : undefined;
 
   const assignedByName =
-    assignedByPerson?.name ||
-    assignedByPerson?.email ||
-    "Unknown Mentor";
+    assignedByPerson?.name || assignedByPerson?.email || "Unknown Mentor";
 
   return (
     <main className="min-h-screen bg-[#171717] p-4 text-gray-900">
@@ -317,9 +311,7 @@ export default function InternTaskDetail() {
 
           <h1 className="mb-6 text-2xl font-semibold">Task Detail</h1>
 
-          {loading && (
-            <p className="text-sm text-gray-500">Loading task...</p>
-          )}
+          {loading && <p className="text-sm text-gray-500">Loading task...</p>}
 
           {error && (
             <div className="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -334,9 +326,7 @@ export default function InternTaskDetail() {
                   <p className="mb-2 text-xs text-gray-400">
                     {task.id.slice(0, 8)}
                   </p>
-                  <h2 className="text-xl font-semibold">
-                    {task.title}
-                  </h2>
+                  <h2 className="text-xl font-semibold">{task.title}</h2>
                 </div>
 
                 <p className="mb-6 text-sm text-gray-700">
@@ -403,15 +393,13 @@ export default function InternTaskDetail() {
                 </div>
 
                 <p className="mt-4 text-xs text-gray-400">
-                  Assigned tasks can be started by the Intern. In
-                  Progress tasks can be submitted for Mentor review.
+                  Assigned tasks can be started by the Intern. In Progress tasks
+                  can be submitted for Mentor review.
                 </p>
               </section>
 
               <section className="mt-6 rounded-xl border border-gray-300 p-6">
-                <h2 className="mb-3 text-lg font-semibold">
-                  Task Submission
-                </h2>
+                <h2 className="mb-3 text-lg font-semibold">Task Submission</h2>
 
                 {task.status === "Assigned" && (
                   <p className="text-sm text-gray-500">
@@ -445,9 +433,7 @@ export default function InternTaskDetail() {
                       <input
                         type="file"
                         onChange={(event) =>
-                          setSubmissionFile(
-                            event.target.files?.[0] ?? null,
-                          )
+                          setSubmissionFile(event.target.files?.[0] ?? null)
                         }
                         className="block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm"
                       />

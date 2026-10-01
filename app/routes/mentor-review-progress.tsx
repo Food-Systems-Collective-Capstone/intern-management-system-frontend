@@ -40,7 +40,9 @@ type WeeklyProgress = {
   updated_at: string;
 };
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 const TEST_MENTOR_EMAIL = "team40.mentor.test@example.com";
 const TEST_INTERN_EMAIL = "team40.intern1.test@example.com";
@@ -137,35 +139,28 @@ export default function MentorReviewProgress() {
           throw new Error("Unable to load account information.");
         }
 
-        const peopleResult: AssignmentPerson[] =
-          await peopleResponse.json();
+        const peopleResult: AssignmentPerson[] = await peopleResponse.json();
 
         setPeople(peopleResult);
 
         const mentor =
           peopleResult.find(
             (person) =>
-              person.email.toLowerCase() ===
-              TEST_MENTOR_EMAIL.toLowerCase(),
+              person.email.toLowerCase() === TEST_MENTOR_EMAIL.toLowerCase(),
           ) ?? null;
 
         const intern =
           peopleResult.find(
             (person) =>
-              person.email.toLowerCase() ===
-              TEST_INTERN_EMAIL.toLowerCase(),
+              person.email.toLowerCase() === TEST_INTERN_EMAIL.toLowerCase(),
           ) ?? null;
 
         if (!mentor) {
-          throw new Error(
-            "Team 40 Mentor test account is not available.",
-          );
+          throw new Error("Team 40 Mentor test account is not available.");
         }
 
         if (!intern) {
-          throw new Error(
-            "Team 40 Intern test account is not available.",
-          );
+          throw new Error("Team 40 Intern test account is not available.");
         }
 
         const reviewsResponse = await fetch(
@@ -173,9 +168,7 @@ export default function MentorReviewProgress() {
         );
 
         if (!reviewsResponse.ok) {
-          const result = await reviewsResponse
-            .json()
-            .catch(() => null);
+          const result = await reviewsResponse.json().catch(() => null);
 
           throw new Error(
             result?.message || "Unable to load submission reviews.",
@@ -237,9 +230,7 @@ export default function MentorReviewProgress() {
         if (!response.ok) {
           const result = await response.json().catch(() => null);
 
-          throw new Error(
-            result?.message || "Unable to load Weekly Progress.",
-          );
+          throw new Error(result?.message || "Unable to load Weekly Progress.");
         }
 
         const result: WeeklyProgress[] = await response.json();
@@ -426,9 +417,7 @@ export default function MentorReviewProgress() {
             <div className="mt-7 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
               <div className="rounded-lg border border-gray-300 p-4">
                 <p className="text-xs text-gray-500">Total Tasks</p>
-                <p className="mt-1 text-2xl font-semibold">
-                  {summary.total}
-                </p>
+                <p className="mt-1 text-2xl font-semibold">{summary.total}</p>
               </div>
 
               <div className="rounded-lg border border-gray-300 p-4">
@@ -461,9 +450,7 @@ export default function MentorReviewProgress() {
 
               <div className="rounded-lg border border-gray-300 p-4">
                 <p className="text-xs text-gray-500">Overdue</p>
-                <p className="mt-1 text-2xl font-semibold">
-                  {summary.overdue}
-                </p>
+                <p className="mt-1 text-2xl font-semibold">{summary.overdue}</p>
               </div>
 
               <div className="rounded-lg border border-gray-300 p-4">
@@ -486,9 +473,7 @@ export default function MentorReviewProgress() {
             <select
               id="intern-filter"
               value={selectedInternId}
-              onChange={(event) =>
-                setSelectedInternId(event.target.value)
-              }
+              onChange={(event) => setSelectedInternId(event.target.value)}
               disabled={loading || internOptions.length === 0}
               className="w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-3 outline-none focus:border-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -527,9 +512,7 @@ export default function MentorReviewProgress() {
 
           {!loading && filteredReviews.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-lg font-semibold">
-                Task Submission Review
-              </h2>
+              <h2 className="text-lg font-semibold">Task Submission Review</h2>
 
               <div className="mt-4 space-y-6">
                 {filteredReviews.map((review) => {
@@ -590,9 +573,7 @@ export default function MentorReviewProgress() {
 
                             <p className="mt-1 text-sm text-gray-700">
                               {review.due_date
-                                ? new Date(
-                                    review.due_date,
-                                  ).toLocaleDateString()
+                                ? new Date(review.due_date).toLocaleDateString()
                                 : "No due date"}
                             </p>
                           </div>
@@ -604,9 +585,7 @@ export default function MentorReviewProgress() {
 
                             <p className="mt-1 text-sm text-gray-700">
                               {review.submitted_at
-                                ? new Date(
-                                    review.submitted_at,
-                                  ).toLocaleString()
+                                ? new Date(review.submitted_at).toLocaleString()
                                 : "Not yet submitted"}
                             </p>
                           </div>
@@ -649,8 +628,7 @@ export default function MentorReviewProgress() {
                               </p>
 
                               <div className="mt-2 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm">
-                                {review.attachment_url &&
-                                review.file_name ? (
+                                {review.attachment_url && review.file_name ? (
                                   <a
                                     href={review.attachment_url}
                                     target="_blank"
@@ -677,9 +655,7 @@ export default function MentorReviewProgress() {
                           <div className="flex justify-end">
                             <button
                               type="button"
-                              disabled={
-                                completingTaskId === review.task_id
-                              }
+                              disabled={completingTaskId === review.task_id}
                               onClick={() =>
                                 void handleComplete(review.task_id)
                               }
@@ -692,11 +668,9 @@ export default function MentorReviewProgress() {
                           </div>
                         )}
 
-                        {(completed ||
-                          successTaskId === review.task_id) && (
+                        {(completed || successTaskId === review.task_id) && (
                           <div className="rounded-md border border-green-300 bg-green-50 px-4 py-4 text-sm text-green-700">
                             ✓ This task has been marked Completed.
-
                           </div>
                         )}
                       </div>
@@ -709,13 +683,10 @@ export default function MentorReviewProgress() {
 
           <div className="mt-10 border-t border-gray-200 pt-8">
             <div>
-              <h2 className="text-lg font-semibold">
-                Weekly Progress
-              </h2>
+              <h2 className="text-lg font-semibold">Weekly Progress</h2>
 
               <p className="mt-1 text-sm text-gray-500">
-                Review the selected Intern&apos;s submitted Weekly
-                Progress.
+                Review the selected Intern&apos;s submitted Weekly Progress.
               </p>
             </div>
 
@@ -737,9 +708,7 @@ export default function MentorReviewProgress() {
 
             {weeklyError && (
               <div className="mt-4 rounded-xl border border-red-300 bg-red-50 px-5 py-5">
-                <p className="text-sm text-red-700">
-                  {weeklyError}
-                </p>
+                <p className="text-sm text-red-700">{weeklyError}</p>
               </div>
             )}
 
@@ -758,74 +727,70 @@ export default function MentorReviewProgress() {
                 </div>
               )}
 
-            {!weeklyLoading &&
-              !weeklyError &&
-              weeklyProgress.length > 0 && (
-                <div className="mt-4 space-y-4">
-                  {weeklyProgress.map((progress) => (
-                    <article
-                      key={progress.id}
-                      className="rounded-xl border border-gray-300 bg-white p-5"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-4">
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-gray-400">
-                            Reporting week
-                          </p>
+            {!weeklyLoading && !weeklyError && weeklyProgress.length > 0 && (
+              <div className="mt-4 space-y-4">
+                {weeklyProgress.map((progress) => (
+                  <article
+                    key={progress.id}
+                    className="rounded-xl border border-gray-300 bg-white p-5"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-gray-400">
+                          Reporting week
+                        </p>
 
-                          <p className="mt-1 font-semibold">
-                            {formatReportingWeek(
-                              progress.reporting_week,
-                            )}
-                          </p>
-                        </div>
-
-                        <span className="rounded-md border border-green-300 bg-green-50 px-3 py-1 text-sm text-green-700">
-                          Submitted
-                        </span>
+                        <p className="mt-1 font-semibold">
+                          {formatReportingWeek(progress.reporting_week)}
+                        </p>
                       </div>
 
-                      <div className="mt-5 space-y-5">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Accomplishments
+                      <span className="rounded-md border border-green-300 bg-green-50 px-3 py-1 text-sm text-green-700">
+                        Submitted
+                      </span>
+                    </div>
+
+                    <div className="mt-5 space-y-5">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Accomplishments
+                        </p>
+
+                        <div className="mt-2 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                          <p className="whitespace-pre-wrap">
+                            {progress.accomplishments}
                           </p>
-
-                          <div className="mt-2 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                            <p className="whitespace-pre-wrap">
-                              {progress.accomplishments}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Blockers
-                          </p>
-
-                          <div className="mt-2 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                            <p className="whitespace-pre-wrap">
-                              {progress.blockers}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Next steps
-                          </p>
-
-                          <div className="mt-2 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                            <p className="whitespace-pre-wrap">
-                              {progress.next_steps}
-                            </p>
-                          </div>
                         </div>
                       </div>
-                    </article>
-                  ))}
-                </div>
-              )}
+
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Blockers
+                        </p>
+
+                        <div className="mt-2 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                          <p className="whitespace-pre-wrap">
+                            {progress.blockers}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Next steps
+                        </p>
+
+                        <div className="mt-2 rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                          <p className="whitespace-pre-wrap">
+                            {progress.next_steps}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </div>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
@@ -74,9 +73,7 @@ export default function InternTasks() {
         const result: Task[] = await response.json();
         setTasks(result);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Unable to load tasks.",
-        );
+        setError(err instanceof Error ? err.message : "Unable to load tasks.");
       } finally {
         setLoading(false);
       }

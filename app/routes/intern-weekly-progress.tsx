@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
@@ -19,7 +18,9 @@ type ApiError = {
 };
 
 const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 export function meta() {
   return [
@@ -71,16 +72,12 @@ export default function InternWeeklyProgress() {
             .json()
             .catch(() => null);
 
-          throw new Error(
-            result?.message || "Unable to load Weekly Progress.",
-          );
+          throw new Error(result?.message || "Unable to load Weekly Progress.");
         }
 
         const text = await response.text();
 
-        const result: WeeklyProgress | null = text
-          ? JSON.parse(text)
-          : null;
+        const result: WeeklyProgress | null = text ? JSON.parse(text) : null;
 
         setExistingProgress(result);
 
@@ -113,11 +110,7 @@ export default function InternWeeklyProgress() {
     setError("");
     setSuccess("");
 
-    if (
-      !accomplishments.trim() ||
-      !blockers.trim() ||
-      !nextSteps.trim()
-    ) {
+    if (!accomplishments.trim() || !blockers.trim() || !nextSteps.trim()) {
       setError(
         "Please complete Accomplishments, Blockers and Next steps before submitting.",
       );
@@ -237,9 +230,7 @@ export default function InternWeeklyProgress() {
               Reporting week
             </p>
 
-            <p className="mt-1 text-sm font-medium">
-              {reportingWeek}
-            </p>
+            <p className="mt-1 text-sm font-medium">{reportingWeek}</p>
           </div>
 
           {loading && (
@@ -269,10 +260,7 @@ export default function InternWeeklyProgress() {
                 </div>
               )}
 
-              <form
-                onSubmit={handleSubmit}
-                className="mt-6 space-y-6"
-              >
+              <form onSubmit={handleSubmit} className="mt-6 space-y-6">
                 <div>
                   <label
                     htmlFor="accomplishments"
@@ -284,9 +272,7 @@ export default function InternWeeklyProgress() {
                   <textarea
                     id="accomplishments"
                     value={accomplishments}
-                    onChange={(event) =>
-                      setAccomplishments(event.target.value)
-                    }
+                    onChange={(event) => setAccomplishments(event.target.value)}
                     disabled={locked || submitting}
                     rows={5}
                     placeholder="What did you accomplish this week?"
@@ -305,9 +291,7 @@ export default function InternWeeklyProgress() {
                   <textarea
                     id="blockers"
                     value={blockers}
-                    onChange={(event) =>
-                      setBlockers(event.target.value)
-                    }
+                    onChange={(event) => setBlockers(event.target.value)}
                     disabled={locked || submitting}
                     rows={5}
                     placeholder="What blockers or challenges did you face?"
@@ -326,9 +310,7 @@ export default function InternWeeklyProgress() {
                   <textarea
                     id="nextSteps"
                     value={nextSteps}
-                    onChange={(event) =>
-                      setNextSteps(event.target.value)
-                    }
+                    onChange={(event) => setNextSteps(event.target.value)}
                     disabled={locked || submitting}
                     rows={5}
                     placeholder="What will you work on next?"
@@ -342,9 +324,7 @@ export default function InternWeeklyProgress() {
                     disabled={submitting}
                     className="rounded-lg bg-[#3f3d3d] px-6 py-3 text-sm font-medium text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {submitting
-                      ? "Submitting..."
-                      : "Submit progress"}
+                    {submitting ? "Submitting..." : "Submit progress"}
                   </button>
                 )}
               </form>
