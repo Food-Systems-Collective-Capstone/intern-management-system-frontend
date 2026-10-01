@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
@@ -27,7 +26,9 @@ type WeeklyProgress = {
 };
 
 const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 export function meta() {
   return [
@@ -51,8 +52,9 @@ function getLocalDateString() {
 
 export default function InternWorkspace() {
   const [tasks, setTasks] = useState<InternTask[]>([]);
-  const [weeklyProgress, setWeeklyProgress] =
-    useState<WeeklyProgress | null>(null);
+  const [weeklyProgress, setWeeklyProgress] = useState<WeeklyProgress | null>(
+    null,
+  );
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -75,17 +77,13 @@ export default function InternWorkspace() {
         if (!tasksResponse.ok) {
           const result = await tasksResponse.json().catch(() => null);
 
-          throw new Error(
-            result?.message || "Unable to load Intern tasks.",
-          );
+          throw new Error(result?.message || "Unable to load Intern tasks.");
         }
 
         if (!weeklyResponse.ok) {
           const result = await weeklyResponse.json().catch(() => null);
 
-          throw new Error(
-            result?.message || "Unable to load Weekly Progress.",
-          );
+          throw new Error(result?.message || "Unable to load Weekly Progress.");
         }
 
         const tasksResult: InternTask[] = await tasksResponse.json();
@@ -226,9 +224,7 @@ export default function InternWorkspace() {
               <div className="mt-7 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
                 <div className="rounded-lg border border-gray-300 p-4">
                   <p className="text-xs text-gray-500">Total Tasks</p>
-                  <p className="mt-1 text-2xl font-semibold">
-                    {summary.total}
-                  </p>
+                  <p className="mt-1 text-2xl font-semibold">{summary.total}</p>
                 </div>
 
                 <div className="rounded-lg border border-gray-300 p-4">
@@ -284,8 +280,7 @@ export default function InternWorkspace() {
                       <h2 className="text-lg font-semibold">My Tasks</h2>
 
                       <p className="mt-2 text-sm text-gray-500">
-                        View your assigned tasks, task details and
-                        submissions.
+                        View your assigned tasks, task details and submissions.
                       </p>
                     </div>
 
@@ -294,9 +289,7 @@ export default function InternWorkspace() {
                     </span>
                   </div>
 
-                  <p className="mt-6 text-sm font-medium">
-                    View My Tasks →
-                  </p>
+                  <p className="mt-6 text-sm font-medium">View My Tasks →</p>
                 </Link>
 
                 <Link
@@ -305,13 +298,10 @@ export default function InternWorkspace() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-semibold">
-                        Weekly Progress
-                      </h2>
+                      <h2 className="text-lg font-semibold">Weekly Progress</h2>
 
                       <p className="mt-2 text-sm text-gray-500">
-                        Submit your accomplishments, blockers and next
-                        steps.
+                        Submit your accomplishments, blockers and next steps.
                       </p>
                     </div>
 
