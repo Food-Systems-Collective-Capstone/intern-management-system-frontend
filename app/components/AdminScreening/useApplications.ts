@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchApplications, type Candidate } from "~/lib/applications";
 
 export function useApplications(page: number, status: string) {
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const key = `${page}:${status}`;
   const [result, setResult] = useState<{
     key: string;
@@ -32,12 +33,17 @@ export function useApplications(page: number, status: string) {
         }
       });
     return () => controller.abort();
-  }, [page, status, key]);
+  }, [page, status, key, refreshVersion]);
+
+  const refetch = useCallback(() => {
+    setRefreshVersion((version) => version + 1);
+  }, []);
 
   return {
     data: result?.key === key ? result.data : [],
     total: result?.key === key ? result.total : 0,
     loading: result?.key !== key,
     error: result?.key === key ? result.error : "",
+    refetch,
   };
 }

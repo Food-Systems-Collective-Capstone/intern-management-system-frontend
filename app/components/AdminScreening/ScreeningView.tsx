@@ -15,10 +15,14 @@ export function ScreeningView() {
   const [status, setStatus] = useState("");
   const [program, setProgram] = useState("");
   const [search, setSearch] = useState("");
+  const [success, setSuccess] = useState("");
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
     null,
   );
-  const { data, total, loading, error } = useApplications(page, status);
+  const { data, total, loading, error, refetch } = useApplications(
+    page,
+    status,
+  );
   const programs = useMemo(
     () => [...new Set(data.map((item) => item.degree).filter(Boolean))].sort(),
     [data],
@@ -159,6 +163,14 @@ export function ScreeningView() {
           all applications.
         </p>
         <div className="mt-7" aria-busy={loading}>
+          {success && (
+            <p
+              role="status"
+              className="mb-4 rounded border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+            >
+              {success}
+            </p>
+          )}
           {loading ? (
             <p role="status" className="p-8">
               Loading applications…
@@ -215,6 +227,13 @@ export function ScreeningView() {
         <CandidateDetails
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
+          onPromoted={(updatedCandidate) => {
+            setSelectedCandidate(updatedCandidate);
+            setSuccess(
+              `${updatedCandidate.firstname} ${updatedCandidate.lastname} was promoted to Intern.`,
+            );
+            refetch();
+          }}
         />
       )}
     </main>
