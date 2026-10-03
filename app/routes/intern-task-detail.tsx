@@ -11,20 +11,13 @@ type Task = {
   priority: string | null;
   assigned_intern_id: string;
   assigned_by_mentor_id: string;
+  assigned_by_mentor_name?: string | null;
+  assigned_by_mentor_email?: string | null;
   reference_file_url: string | null;
   reference_file_name: string | null;
   reference_attachment_url: string | null;
   created_at: string;
   updated_at: string;
-};
-
-type AssignmentPerson = {
-  id: string;
-  email: string;
-  role: string;
-  first_name: string | null;
-  last_name: string | null;
-  name: string;
 };
 
 type CurrentUser = {
@@ -107,9 +100,6 @@ export default function InternTaskDetail() {
 
   const [task, setTask] = useState<Task | null>(null);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [assignmentPeople, setAssignmentPeople] = useState<AssignmentPerson[]>(
-    [],
-  );
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -141,16 +131,12 @@ export default function InternTaskDetail() {
 
         setCurrentUser(user);
 
-        const [taskResponse, peopleResponse] = await Promise.all([
-          apiFetch(`/tasks/intern/${user.id}/${taskId}`),
-          apiFetch("/tasks/assignment-people"),
-        ]);
+        const taskResponse = await apiFetch(
+          `/tasks/intern/${user.id}/${taskId}`,
+        );
 
         const taskResult: Task = await taskResponse.json();
         setTask(taskResult);
-
-        const peopleResult: AssignmentPerson[] = await peopleResponse.json();
-        setAssignmentPeople(peopleResult);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unable to load task.");
       } finally {
@@ -180,6 +166,8 @@ export default function InternTaskDetail() {
           ? {
               ...currentTask,
               ...updatedTask,
+              assigned_by_mentor_name: currentTask.assigned_by_mentor_name,
+              assigned_by_mentor_email: currentTask.assigned_by_mentor_email,
               reference_file_url: currentTask.reference_file_url,
               reference_file_name: currentTask.reference_file_name,
               reference_attachment_url: currentTask.reference_attachment_url,
@@ -249,14 +237,10 @@ export default function InternTaskDetail() {
     }
   }
 
-  const assignedByPerson = task
-    ? assignmentPeople.find(
-        (person) => person.id === task.assigned_by_mentor_id,
-      )
-    : undefined;
-
   const assignedByName =
-    assignedByPerson?.name || assignedByPerson?.email || "Unknown Mentor";
+    task?.assigned_by_mentor_name ||
+    task?.assigned_by_mentor_email ||
+    "Unknown Mentor";
 
   return (
     <main className="min-h-screen bg-[#171717] p-4 text-gray-900">
