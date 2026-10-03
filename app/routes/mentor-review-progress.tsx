@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
+import { apiFetch } from "../lib/api";
 
 type AssignmentPerson = {
   id: string;
@@ -40,12 +41,14 @@ type WeeklyProgress = {
   updated_at: string;
 };
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/$/, "");
-
-const TEST_MENTOR_EMAIL = "team40.mentor.test@example.com";
-const TEST_INTERN_EMAIL = "team40.intern1.test@example.com";
+type CurrentUser = {
+  id: string;
+  email: string;
+  role: string;
+  first_name: string | null;
+  last_name: string | null;
+  name: string;
+};
 
 export function meta() {
   return [
@@ -97,6 +100,7 @@ function formatReportingWeek(value: string) {
 
 export default function MentorReviewProgress() {
   const [people, setPeople] = useState<AssignmentPerson[]>([]);
+  const [currentMentor, setCurrentMentor] = useState<CurrentUser | null>(null);
   const [reviews, setReviews] = useState<MentorSubmissionReview[]>([]);
   const [selectedInternId, setSelectedInternId] = useState("");
 
@@ -111,75 +115,49 @@ export default function MentorReviewProgress() {
   const [successTaskId, setSuccessTaskId] = useState("");
   const [completingTaskId, setCompletingTaskId] = useState("");
 
-  // Temporary Team 40 DEV identities.
-  // Shared authentication will provide the signed-in user later.
-  const currentMentor =
-    people.find(
-      (person) =>
-        person.email.toLowerCase() === TEST_MENTOR_EMAIL.toLowerCase(),
-    ) ?? null;
-
-  const currentIntern =
-    people.find(
-      (person) =>
-        person.email.toLowerCase() === TEST_INTERN_EMAIL.toLowerCase(),
-    ) ?? null;
-
   useEffect(() => {
     async function loadReviewData() {
       try {
         setLoading(true);
         setError("");
 
-        const peopleResponse = await fetch(
-          `${API_BASE_URL}/tasks/assignment-people`,
-        );
+        const [userResponse, peopleResponse] = await Promise.all([
+          apiFetch("/tasks/me"),
+          apiFetch("/tasks/assignment-people"),
+        ]);
 
-        if (!peopleResponse.ok) {
-          throw new Error("Unable to load account information.");
+        const user: CurrentUser = await userResponse.json();
+
+        if (user.role.trim().toLowerCase() !== "mentor") {
+          throw new Error("The signed-in account is not a Mentor.");
         }
 
         const peopleResult: AssignmentPerson[] = await peopleResponse.json();
 
-        setPeople(peopleResult);
-
-        const mentor =
-          peopleResult.find(
-            (person) =>
-              person.email.toLowerCase() === TEST_MENTOR_EMAIL.toLowerCase(),
-          ) ?? null;
-
-        const intern =
-          peopleResult.find(
-            (person) =>
-              person.email.toLowerCase() === TEST_INTERN_EMAIL.toLowerCase(),
-          ) ?? null;
-
-        if (!mentor) {
-          throw new Error("Team 40 Mentor test account is not available.");
-        }
-
-        if (!intern) {
-          throw new Error("Team 40 Intern test account is not available.");
-        }
-
-        const reviewsResponse = await fetch(
-          `${API_BASE_URL}/tasks/mentor/${mentor.id}/reviews`,
+        const interns = peopleResult.filter(
+          (person) => person.role.trim().toLowerCase() === "intern",
         );
 
-        if (!reviewsResponse.ok) {
-          const result = await reviewsResponse.json().catch(() => null);
+        setCurrentMentor(user);
+        setPeople(peopleResult);
 
-          throw new Error(
-            result?.message || "Unable to load submission reviews.",
-          );
-        }
+        const reviewsResponse = await apiFetch(
+          `/tasks/mentor/${user.id}/reviews`,
+        );
 
         const reviewsResult: MentorSubmissionReview[] =
           await reviewsResponse.json();
 
         setReviews(reviewsResult);
-        setSelectedInternId(intern.id);
+
+        const firstRelevantIntern =
+          interns.find((intern) =>
+            reviewsResult.some(
+              (review) => review.assigned_intern_id === intern.id,
+            ),
+          ) ?? interns[0];
+
+        setSelectedInternId(firstRelevantIntern?.id ?? "");
       } catch (err) {
         setError(
           err instanceof Error
@@ -194,19 +172,17 @@ export default function MentorReviewProgress() {
     void loadReviewData();
   }, []);
 
-  const internOptions = useMemo(() => {
-    if (!currentIntern) {
-      return [];
-    }
-
-    return [
-      {
-        id: currentIntern.id,
-        name: currentIntern.name,
-        email: currentIntern.email,
-      },
-    ];
-  }, [currentIntern]);
+  const internOptions = useMemo(
+    () =>
+      people
+        .filter((person) => person.role.trim().toLowerCase() === "intern")
+        .map((person) => ({
+          id: person.id,
+          name: person.name,
+          email: person.email,
+        })),
+    [people],
+  );
 
   useEffect(() => {
     if (!currentMentor || !selectedInternId) {
@@ -223,15 +199,9 @@ export default function MentorReviewProgress() {
         setWeeklyLoading(true);
         setWeeklyError("");
 
-        const response = await fetch(
-          `${API_BASE_URL}/weekly-progress/mentor/${currentMentor.id}/intern/${selectedInternId}`,
+        const response = await apiFetch(
+          `/weekly-progress/mentor/${currentMentor.id}/intern/${selectedInternId}`,
         );
-
-        if (!response.ok) {
-          const result = await response.json().catch(() => null);
-
-          throw new Error(result?.message || "Unable to load Weekly Progress.");
-        }
 
         const result: WeeklyProgress[] = await response.json();
 
@@ -320,7 +290,7 @@ export default function MentorReviewProgress() {
 
   async function handleComplete(taskId: string) {
     if (!currentMentor) {
-      setError("Mentor account information is not available.");
+      setError("Authenticated Mentor account information is not available.");
       return;
     }
 
@@ -329,20 +299,12 @@ export default function MentorReviewProgress() {
     setCompletingTaskId(taskId);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/tasks/mentor/${currentMentor.id}/${taskId}/complete`,
+      const response = await apiFetch(
+        `/tasks/mentor/${currentMentor.id}/${taskId}/complete`,
         {
           method: "PATCH",
         },
       );
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => null);
-
-        throw new Error(
-          result?.message || "Unable to mark this task Completed.",
-        );
-      }
 
       const result: {
         id: string;
@@ -385,7 +347,7 @@ export default function MentorReviewProgress() {
             <div className="h-[55px] w-[55px] rounded-full bg-[#d9d9d9]" />
 
             <span className="text-xl font-semibold tracking-[-0.4px]">
-              Mentor
+              {currentMentor?.name || "Mentor"}
             </span>
           </div>
         </header>

@@ -6,10 +6,7 @@ import {
   type FormEvent,
 } from "react";
 import { Link } from "react-router";
-
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/$/, "");
+import { apiFetch } from "../lib/api";
 
 type TaskFormData = {
   title: string;
@@ -20,6 +17,15 @@ type TaskFormData = {
 };
 
 type AssignmentPerson = {
+  id: string;
+  email: string;
+  role: string;
+  first_name: string | null;
+  last_name: string | null;
+  name: string;
+};
+
+type CurrentUser = {
   id: string;
   email: string;
   role: string;
@@ -46,6 +52,7 @@ export function meta() {
 export default function MentorTaskAssignment() {
   const [form, setForm] = useState<TaskFormData>(initialForm);
   const [people, setPeople] = useState<AssignmentPerson[]>([]);
+  const [currentMentor, setCurrentMentor] = useState<CurrentUser | null>(null);
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [loadingPeople, setLoadingPeople] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -55,16 +62,26 @@ export default function MentorTaskAssignment() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    async function loadPeople() {
+    async function loadPageData() {
       try {
-        const response = await fetch(`${API_BASE_URL}/tasks/assignment-people`);
+        setLoadingPeople(true);
+        setError("");
 
-        if (!response.ok) {
-          throw new Error("Unable to load account information.");
+        const [userResponse, peopleResponse] = await Promise.all([
+          apiFetch("/tasks/me"),
+          apiFetch("/tasks/assignment-people"),
+        ]);
+
+        const user: CurrentUser = await userResponse.json();
+
+        if (user.role.trim().toLowerCase() !== "mentor") {
+          throw new Error("The signed-in account is not a Mentor.");
         }
 
-        const result: AssignmentPerson[] = await response.json();
-        setPeople(result);
+        const peopleResult: AssignmentPerson[] = await peopleResponse.json();
+
+        setCurrentMentor(user);
+        setPeople(peopleResult);
       } catch (err) {
         setError(
           err instanceof Error
@@ -76,14 +93,8 @@ export default function MentorTaskAssignment() {
       }
     }
 
-    void loadPeople();
+    void loadPageData();
   }, []);
-
-  // Temporary Team 40 test identities for DEV/integration work.
-  // Final signed-in identity will come from shared authentication/RBAC.
-  const currentMentor =
-    people.find((person) => person.role.trim().toLowerCase() === "mentor") ??
-    null;
 
   const interns = people.filter(
     (person) => person.role.trim().toLowerCase() === "intern",
@@ -127,7 +138,7 @@ export default function MentorTaskAssignment() {
     }
 
     if (!currentMentor) {
-      setError("Mentor account information is not available.");
+      setError("Authenticated Mentor account information is not available.");
       return;
     }
 
@@ -147,22 +158,10 @@ export default function MentorTaskAssignment() {
         payload.append("reference_file", referenceFile);
       }
 
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
+      await apiFetch("/tasks", {
         method: "POST",
         body: payload,
       });
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => null);
-
-        const message = Array.isArray(result?.message)
-          ? result.message.join(", ")
-          : result?.message;
-
-        throw new Error(message || "Unable to assign task.");
-      }
-
-      await response.json();
 
       const selectedIntern = interns.find(
         (person) => person.id === form.assigned_intern_id,
@@ -195,7 +194,9 @@ export default function MentorTaskAssignment() {
 
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 rounded-full bg-gray-200" />
-            <span className="text-2xl font-bold">Mentor</span>
+            <span className="text-2xl font-bold">
+              {currentMentor?.name || "Mentor"}
+            </span>
           </div>
         </header>
 
@@ -330,11 +331,6 @@ export default function MentorTaskAssignment() {
                   </option>
                 ))}
               </select>
-
-              <p className="mt-2 text-xs text-gray-400">
-                Temporary Team 40 Intern accounts are used for current DEV
-                integration testing.
-              </p>
             </div>
 
             <div>
@@ -370,7 +366,7 @@ export default function MentorTaskAssignment() {
                   ? "Loading..."
                   : currentMentor
                     ? `${currentMentor.name} (you)`
-                    : "No Mentor account available"}
+                    : "Mentor account unavailable"}
               </div>
             </div>
 

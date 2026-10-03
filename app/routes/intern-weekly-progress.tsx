@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
+import { apiFetch } from "../lib/api";
 
 type WeeklyProgress = {
   id: string;
@@ -13,14 +14,14 @@ type WeeklyProgress = {
   updated_at: string;
 };
 
-type ApiError = {
-  message?: string;
+type CurrentUser = {
+  id: string;
+  email: string;
+  role: string;
+  first_name: string | null;
+  last_name: string | null;
+  name: string;
 };
-
-const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/$/, "");
 
 export function meta() {
   return [
@@ -45,6 +46,8 @@ function getLocalDateString() {
 export default function InternWeeklyProgress() {
   const [reportingWeek] = useState(() => getLocalDateString());
 
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+
   const [accomplishments, setAccomplishments] = useState("");
   const [blockers, setBlockers] = useState("");
   const [nextSteps, setNextSteps] = useState("");
@@ -63,17 +66,18 @@ export default function InternWeeklyProgress() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `${API_BASE_URL}/weekly-progress/intern/${TEST_INTERN_ID}?reporting_week=${reportingWeek}`,
-        );
+        const userResponse = await apiFetch("/tasks/me");
+        const user: CurrentUser = await userResponse.json();
 
-        if (!response.ok) {
-          const result: ApiError | null = await response
-            .json()
-            .catch(() => null);
-
-          throw new Error(result?.message || "Unable to load Weekly Progress.");
+        if (user.role.trim().toLowerCase() !== "intern") {
+          throw new Error("The signed-in account is not an Intern.");
         }
+
+        setCurrentUser(user);
+
+        const response = await apiFetch(
+          `/weekly-progress/intern/${user.id}?reporting_week=${reportingWeek}`,
+        );
 
         const text = await response.text();
 
@@ -107,6 +111,11 @@ export default function InternWeeklyProgress() {
       return;
     }
 
+    if (!currentUser) {
+      setError("Authenticated Intern account information is not available.");
+      return;
+    }
+
     setError("");
     setSuccess("");
 
@@ -120,8 +129,8 @@ export default function InternWeeklyProgress() {
     try {
       setSubmitting(true);
 
-      const response = await fetch(
-        `${API_BASE_URL}/weekly-progress/intern/${TEST_INTERN_ID}`,
+      const response = await apiFetch(
+        `/weekly-progress/intern/${currentUser.id}`,
         {
           method: "POST",
           headers: {
@@ -138,16 +147,7 @@ export default function InternWeeklyProgress() {
 
       const text = await response.text();
 
-      const result: WeeklyProgress | ApiError | null = text
-        ? JSON.parse(text)
-        : null;
-
-      if (!response.ok) {
-        throw new Error(
-          (result as ApiError | null)?.message ||
-            "Unable to submit Weekly Progress.",
-        );
-      }
+      const result: WeeklyProgress | null = text ? JSON.parse(text) : null;
 
       if (!result) {
         throw new Error(
@@ -155,12 +155,10 @@ export default function InternWeeklyProgress() {
         );
       }
 
-      const submittedProgress = result as WeeklyProgress;
-
-      setExistingProgress(submittedProgress);
-      setAccomplishments(submittedProgress.accomplishments);
-      setBlockers(submittedProgress.blockers);
-      setNextSteps(submittedProgress.next_steps);
+      setExistingProgress(result);
+      setAccomplishments(result.accomplishments);
+      setBlockers(result.blockers);
+      setNextSteps(result.next_steps);
 
       setSuccess("Weekly Progress submitted successfully.");
     } catch (err) {
@@ -188,7 +186,7 @@ export default function InternWeeklyProgress() {
             <div className="h-[55px] w-[55px] rounded-full bg-[#d9d9d9]" />
 
             <span className="text-xl font-semibold tracking-[-0.4px]">
-              Intern
+              {currentUser?.name || "Intern"}
             </span>
           </div>
         </header>
