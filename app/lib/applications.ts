@@ -19,6 +19,9 @@ export type Candidate = {
   cover_letter_url?: string | null;
   application_status: string;
   created_at: string;
+  is_locked?: boolean;
+  promoted_at?: string | null;
+  promoted_by?: string | null;
 };
 
 export async function createApplication(
@@ -74,4 +77,12 @@ export async function fetchApplications(
   if (status) params.set("status", status);
   const response = await apiFetch(`/api/applications?${params}`, { signal });
   return response.json() as Promise<{ data: Candidate[]; total: number }>;
+}
+
+export async function promoteApplicant(personId: string): Promise<Candidate> {
+  const response = await apiFetch(
+    `/api/applications/${encodeURIComponent(personId)}/promote`,
+    { method: "PATCH" },
+  );
+  return response.json() as Promise<Candidate>;
 }
