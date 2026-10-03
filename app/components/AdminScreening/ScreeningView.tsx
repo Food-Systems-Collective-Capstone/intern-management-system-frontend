@@ -84,6 +84,12 @@ export function ScreeningView() {
             </svg>
             Application
           </div>
+          <Link
+            to="/admin/mentor-assignments"
+            className="block px-7 py-4 font-semibold hover:bg-gray-100"
+          >
+            Mentor assignments
+          </Link>
         </nav>
         <Link
           to="/sign-in"
