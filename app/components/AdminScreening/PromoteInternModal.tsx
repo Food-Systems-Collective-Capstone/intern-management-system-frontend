@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState, type SubmitEvent } from "react";
-import {
-  promoteApplicant,
-  type Candidate,
-} from "../../lib/applications";
+import { promoteApplicant, type Candidate } from "../../lib/applications";
 
 export function PromoteInternModal({
   candidate,
