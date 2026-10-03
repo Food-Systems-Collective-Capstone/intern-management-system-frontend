@@ -7,6 +7,7 @@ export default [
   route("sign-in", "./routes/sign-in.tsx"),
   route("register", "./routes/register.tsx"),
   route("admin/applications", "./routes/admin-applications.tsx"),
+  route("admin/mentor-assignments", "./routes/admin-mentor-assignments.tsx"),
   route("mentor/tasks/assign", "./routes/mentor-task-assignment.tsx"),
   route("mentor/review", "./routes/mentor-review-progress.tsx"),
   route("intern/workspace", "./routes/intern-workspace.tsx"),
