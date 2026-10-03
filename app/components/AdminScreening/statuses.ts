@@ -2,7 +2,7 @@
 export const screeningStatuses = [
   { label: "Submitted", value: "Applied" },
   { label: "Reviewing", value: "Review" },
-  { label: "Accepted", value: "Hired" },
+  { label: "Accepted", value: "Accepted" },
   { label: "Rejected", value: "Rejected" },
 ] as const;
 

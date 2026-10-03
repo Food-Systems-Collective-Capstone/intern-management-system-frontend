@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createApplication,
   fetchApplications,
+  promoteApplicant,
   uploadResume,
 } from "../lib/applications";
 import type { ApplicationData } from "../components/ApplicationForm/formValidation";
@@ -92,5 +93,29 @@ describe("application API contract", () => {
     expect(fetchMock.mock.calls[0][1].headers).toEqual({
       Authorization: "Bearer jwt-token",
     });
+  });
+
+  it("promotes an accepted candidate through the protected backend endpoint", async () => {
+    const promoted = {
+      person_id: "person-123",
+      firstname: "Jane",
+      lastname: "Doe",
+      promoted_at: "2026-10-03T01:00:00.000Z",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify(promoted)));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(promoteApplicant("person-123")).resolves.toMatchObject(
+      promoted,
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend.example.com/api/applications/person-123/promote",
+      expect.objectContaining({
+        method: "PATCH",
+        headers: { Authorization: "Bearer jwt-token" },
+      }),
+    );
   });
 });
