@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/$/, "");
+import { apiFetch } from "../lib/api";
 
 type Task = {
   id: string;
@@ -30,6 +27,15 @@ type AssignmentPerson = {
   name: string;
 };
 
+type CurrentUser = {
+  id: string;
+  email: string;
+  role: string;
+  first_name: string | null;
+  last_name: string | null;
+  name: string;
+};
+
 type SubmissionResponse = {
   submission: {
     id: string;
@@ -47,8 +53,6 @@ type SubmissionResponse = {
     updated_at: string;
   };
 };
-
-const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
 
 export function meta() {
   return [
@@ -102,6 +106,7 @@ export default function InternTaskDetail() {
   const { taskId } = useParams();
 
   const [task, setTask] = useState<Task | null>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [assignmentPeople, setAssignmentPeople] = useState<AssignmentPerson[]>(
     [],
   );
@@ -127,25 +132,25 @@ export default function InternTaskDetail() {
       setTask(null);
 
       try {
-        const [taskResponse, peopleResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}`),
-          fetch(`${API_BASE_URL}/tasks/assignment-people`),
-        ]);
+        const userResponse = await apiFetch("/tasks/me");
+        const user: CurrentUser = await userResponse.json();
 
-        if (!taskResponse.ok) {
-          const result = await taskResponse.json().catch(() => null);
-          throw new Error(result?.message || "Unable to load task.");
+        if (user.role.trim().toLowerCase() !== "intern") {
+          throw new Error("The signed-in account is not an Intern.");
         }
+
+        setCurrentUser(user);
+
+        const [taskResponse, peopleResponse] = await Promise.all([
+          apiFetch(`/tasks/intern/${user.id}/${taskId}`),
+          apiFetch("/tasks/assignment-people"),
+        ]);
 
         const taskResult: Task = await taskResponse.json();
         setTask(taskResult);
 
-        if (peopleResponse.ok) {
-          const peopleResult: AssignmentPerson[] = await peopleResponse.json();
-          setAssignmentPeople(peopleResult);
-        } else {
-          setAssignmentPeople([]);
-        }
+        const peopleResult: AssignmentPerson[] = await peopleResponse.json();
+        setAssignmentPeople(peopleResult);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unable to load task.");
       } finally {
@@ -157,21 +162,16 @@ export default function InternTaskDetail() {
   }, [taskId]);
 
   async function handleStartTask() {
-    if (!taskId || !task) return;
+    if (!taskId || !task || !currentUser) return;
 
     setStarting(true);
     setError("");
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}/start`,
+      const response = await apiFetch(
+        `/tasks/intern/${currentUser.id}/${taskId}/start`,
         { method: "PATCH" },
       );
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => null);
-        throw new Error(result?.message || "Unable to start task.");
-      }
 
       const updatedTask: Task = await response.json();
 
@@ -194,7 +194,7 @@ export default function InternTaskDetail() {
   }
 
   async function handleSubmitTask() {
-    if (!taskId || !task) return;
+    if (!taskId || !task || !currentUser) return;
 
     setSubmissionError("");
     setSubmissionSuccess("");
@@ -217,21 +217,15 @@ export default function InternTaskDetail() {
         formData.append("file", submissionFile);
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}/${taskId}/submission`,
+      const response = await apiFetch(
+        `/tasks/intern/${currentUser.id}/${taskId}/submission`,
         {
           method: "POST",
           body: formData,
         },
       );
 
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(result?.message || "Unable to submit task.");
-      }
-
-      const submissionResult = result as SubmissionResponse;
+      const submissionResult: SubmissionResponse = await response.json();
 
       setTask((currentTask) =>
         currentTask
@@ -274,7 +268,9 @@ export default function InternTaskDetail() {
 
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 rounded-full bg-gray-200" />
-            <span className="text-2xl font-bold">Intern</span>
+            <span className="text-2xl font-bold">
+              {currentUser?.name || "Intern"}
+            </span>
           </div>
         </header>
 

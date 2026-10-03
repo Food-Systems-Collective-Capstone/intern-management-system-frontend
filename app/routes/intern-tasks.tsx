@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { apiFetch } from "../lib/api";
 
 type Task = {
   id: string;
@@ -14,11 +15,14 @@ type Task = {
   updated_at: string;
 };
 
-const TEST_INTERN_ID = "ba89ecd4-3972-4eaf-bcc2-9c077d56204a";
-
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/$/, "");
+type CurrentUser = {
+  id: string;
+  email: string;
+  role: string;
+  first_name: string | null;
+  last_name: string | null;
+  name: string;
+};
 
 export function meta() {
   return [
@@ -55,20 +59,23 @@ function getStatusClasses(status: string) {
 
 export default function InternTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadTasks() {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/tasks/intern/${TEST_INTERN_ID}`,
-        );
+        const userResponse = await apiFetch("/tasks/me");
+        const user: CurrentUser = await userResponse.json();
 
-        if (!response.ok) {
-          const result = await response.json().catch(() => null);
-          throw new Error(result?.message || "Unable to load tasks.");
+        if (user.role.trim().toLowerCase() !== "intern") {
+          throw new Error("The signed-in account is not an Intern.");
         }
+
+        setCurrentUser(user);
+
+        const response = await apiFetch(`/tasks/intern/${user.id}`);
 
         const result: Task[] = await response.json();
         setTasks(result);
@@ -93,7 +100,7 @@ export default function InternTasks() {
           <div className="flex items-center gap-4">
             <div className="h-[55px] w-[55px] rounded-full bg-[#d9d9d9]" />
             <span className="text-xl font-semibold tracking-[-0.4px]">
-              Intern⌄
+              {currentUser?.name || "Intern"}
             </span>
           </div>
         </header>
@@ -190,10 +197,6 @@ export default function InternTasks() {
               ))}
             </div>
           )}
-
-          <p className="mt-6 text-xs text-gray-400">
-            Task visibility is currently based on the temporary test Intern.
-          </p>
         </section>
       </div>
     </main>
