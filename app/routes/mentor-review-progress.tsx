@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { apiFetch } from "../lib/api";
+import { requireRole } from "../lib/route-auth";
+
+export async function clientLoader() {
+  await requireRole("mentor", "/mentor/review");
+  return null;
+}
+
+clientLoader.hydrate = true as const;
 
 type AssignmentPerson = {
   id: string;

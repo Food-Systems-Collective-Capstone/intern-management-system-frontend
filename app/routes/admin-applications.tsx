@@ -1,10 +1,8 @@
-import { redirect } from "react-router";
 import { ScreeningView } from "~/components/AdminScreening/ScreeningView";
-import { hasValidSession } from "~/lib/auth";
+import { requireRole } from "~/lib/route-auth";
 
 export async function clientLoader() {
-  if (!(await hasValidSession()))
-    throw redirect("/sign-in?next=%2Fadmin%2Fapplications");
+  await requireRole("admin", "/admin/applications");
   return null;
 }
 

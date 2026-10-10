@@ -1,10 +1,8 @@
-import { redirect } from "react-router";
 import { MentorAssignmentsView } from "../components/AdminMentorAssignments/MentorAssignmentsView";
-import { hasValidSession } from "../lib/auth";
+import { requireRole } from "../lib/route-auth";
 
 export async function clientLoader() {
-  if (!(await hasValidSession()))
-    throw redirect("/sign-in?next=%2Fadmin%2Fmentor-assignments");
+  await requireRole("admin", "/admin/mentor-assignments");
   return null;
 }
 

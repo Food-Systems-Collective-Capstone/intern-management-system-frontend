@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
 import { apiFetch } from "../lib/api";
+import { requireRole } from "../lib/route-auth";
+
+export async function clientLoader() {
+  await requireRole("intern", "/intern/weekly-progress");
+  return null;
+}
+
+clientLoader.hydrate = true as const;
 
 type WeeklyProgress = {
   id: string;

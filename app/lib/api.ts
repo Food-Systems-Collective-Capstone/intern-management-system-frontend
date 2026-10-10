@@ -1,5 +1,15 @@
 import { getAccessToken, signOut } from "./auth";
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 export async function apiFetch(path: string, init: RequestInit = {}) {
   const token = await getAccessToken();
   if (!token)
@@ -18,10 +28,11 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
     const message = Array.isArray(body?.message)
       ? body.message.join("; ")
       : body?.message;
-    throw new Error(
+    throw new ApiError(
       typeof message === "string"
         ? message
         : `Request failed (${response.status}).`,
+      response.status,
     );
   }
   return response;

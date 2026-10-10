@@ -6,6 +6,7 @@ export default [
   route("application", "./routes/applicationForm.tsx"),
   route("sign-in", "./routes/sign-in.tsx"),
   route("register", "./routes/register.tsx"),
+  route("unauthorized", "./routes/unauthorized.tsx"),
   route("admin/applications", "./routes/admin-applications.tsx"),
   route("admin/mentor-assignments", "./routes/admin-mentor-assignments.tsx"),
   route("mentor/tasks/assign", "./routes/mentor-task-assignment.tsx"),

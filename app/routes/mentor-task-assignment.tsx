@@ -7,6 +7,14 @@ import {
 } from "react";
 import { Link } from "react-router";
 import { apiFetch } from "../lib/api";
+import { requireRole } from "../lib/route-auth";
+
+export async function clientLoader() {
+  await requireRole("mentor", "/mentor/tasks/assign");
+  return null;
+}
+
+clientLoader.hydrate = true as const;
 
 type TaskFormData = {
   title: string;
