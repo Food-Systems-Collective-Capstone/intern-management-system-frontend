@@ -1,13 +1,15 @@
+
 import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { Input } from "~/components/Input";
 import { register, signIn } from "~/lib/auth";
-import { getDefaultRouteForCurrentUser } from "~/lib/route-auth";
+import { getPostLoginDestination } from "~/lib/route-auth";
 
 export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const isRegister = mode === "register";
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,28 +19,35 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (pending) return;
+
     setError("");
+
     if (isRegister && password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     setPending(true);
+
     try {
       if (isRegister) {
-        await register(email.trim(), password, fullName.trim());
+        await register(
+          email.trim(),
+          password,
+          fullName.trim(),
+        );
       } else {
         await signIn(email.trim(), password);
       }
+
       const requestedPath = params.get("next");
-      const safeRequestedPath =
-        requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
-          ? requestedPath
-          : null;
+
       const destination = isRegister
         ? "/application"
-        : (safeRequestedPath ?? (await getDefaultRouteForCurrentUser()));
+        : await getPostLoginDestination(requestedPath);
+
       void navigate(destination, { replace: true });
     } catch (cause) {
       setError(
@@ -60,14 +69,16 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
         >
           FSC Intern Management
         </Link>
+
         <div className="rounded-xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9">
           <h1 className="text-2xl font-bold">
             {isRegister ? "Create your account" : "Welcome back"}
           </h1>
+
           <p className="mt-2 text-sm text-slate-600">
             {isRegister
               ? "Register to start your internship application."
-              : "Sign in to continue your application."}
+              : "Sign in to continue to your workspace."}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-7 space-y-4">
@@ -81,6 +92,7 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
                 onChange={(event) => setFullName(event.target.value)}
               />
             )}
+
             <Input
               label="Email address"
               name="email"
@@ -90,16 +102,20 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
+
             <Input
               label="Password"
               name="password"
               type="password"
-              autoComplete={isRegister ? "new-password" : "current-password"}
+              autoComplete={
+                isRegister ? "new-password" : "current-password"
+              }
               minLength={6}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
+
             {isRegister && (
               <Input
                 label="Confirm password"
@@ -112,6 +128,7 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
                 onChange={(event) => setConfirmPassword(event.target.value)}
               />
             )}
+
             {error && (
               <p
                 role="alert"
@@ -120,13 +137,14 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
                 {error}
               </p>
             )}
+
             <button
               type="submit"
               disabled={pending}
               className="mt-2 w-full rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-wait disabled:opacity-60"
             >
               {pending
-                ? "Please wait…"
+                ? "Please wait..."
                 : isRegister
                   ? "Create account"
                   : "Sign in"}
@@ -134,10 +152,17 @@ export function AuthPage({ mode }: { mode: "sign-in" | "register" }) {
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-600">
-            {isRegister ? "Already have an account? " : "New here? "}
+            {isRegister
+              ? "Already have an account? "
+              : "New here? "}
+
             <Link
               className="font-semibold text-slate-900 underline underline-offset-4"
-              to={`${isRegister ? "/sign-in" : "/register"}${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`}
+              to={`${isRegister ? "/sign-in" : "/register"}${
+                params.get("next")
+                  ? `?next=${encodeURIComponent(params.get("next")!)}`
+                  : ""
+              }`}
             >
               {isRegister ? "Sign in" : "Create an account"}
             </Link>
