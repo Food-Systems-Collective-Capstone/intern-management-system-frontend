@@ -1,9 +1,10 @@
-import { redirect } from "react-router";
 import { ApplicationForm } from "~/components/ApplicationForm/Form";
-import { hasValidSession } from "~/lib/auth";
+import { requireRole } from "~/lib/route-auth";
 
 export async function clientLoader() {
-  if (!(await hasValidSession())) throw redirect("/sign-in?next=%2Fapplication");
+  await requireRole("applicant", "/application", {
+    allowUnprovisionedApplicant: true,
+  });
   return null;
 }
 
@@ -11,7 +12,7 @@ clientLoader.hydrate = true as const;
 
 export default function ApplicationFormRoute() {
   return (
-    <main>
+    <main className="min-h-screen bg-white text-gray-950 [color-scheme:light]">
       <ApplicationForm />
     </main>
   );
