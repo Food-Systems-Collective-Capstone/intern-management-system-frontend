@@ -1,7 +1,11 @@
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiFetch } from "../lib/api";
 import { hasValidSession } from "../lib/auth";
-import { getDefaultRouteForCurrentUser, requireRole } from "../lib/route-auth";
+import {
+  getDefaultRouteForCurrentUser,
+  requireRole,
+} from "../lib/route-auth";
 
 vi.mock("../lib/auth", () => ({
   hasValidSession: vi.fn(),
@@ -31,7 +35,7 @@ describe("protected route authorization", () => {
     );
   });
 
-  it("redirects a non-admin account to the unauthorized page", async () => {
+  it("redirects a non-admin account with the attempted page", async () => {
     vi.mocked(hasValidSession).mockResolvedValue(true);
     vi.mocked(apiFetch).mockResolvedValue(
       new Response(
@@ -48,7 +52,55 @@ describe("protected route authorization", () => {
     );
 
     expect(result).toBeInstanceOf(Response);
-    expect((result as Response).headers.get("Location")).toBe("/unauthorized");
+    expect((result as Response).status).toBe(302);
+    expect((result as Response).headers.get("Location")).toBe(
+      "/unauthorized?from=%2Fadmin%2Fapplications",
+    );
+  });
+
+  it("redirects a Mentor attempting to access an Intern workspace", async () => {
+    vi.mocked(hasValidSession).mockResolvedValue(true);
+    vi.mocked(apiFetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: "mentor-id",
+          email: "mentor@example.com",
+          role: "mentor",
+        }),
+      ),
+    );
+
+    const result = await requireRole("intern", "/intern/workspace").catch(
+      (error: unknown) => error,
+    );
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get("Location")).toBe(
+      "/unauthorized?from=%2Fintern%2Fworkspace",
+    );
+  });
+
+  it("redirects an Intern attempting to access a Mentor workspace", async () => {
+    vi.mocked(hasValidSession).mockResolvedValue(true);
+    vi.mocked(apiFetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: "intern-id",
+          email: "intern@example.com",
+          role: "intern",
+        }),
+      ),
+    );
+
+    const result = await requireRole(
+      "mentor",
+      "/mentor/tasks/assign",
+    ).catch((error: unknown) => error);
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get("Location")).toBe(
+      "/unauthorized?from=%2Fmentor%2Ftasks%2Fassign",
+    );
   });
 
   it("allows an administrator account", async () => {
