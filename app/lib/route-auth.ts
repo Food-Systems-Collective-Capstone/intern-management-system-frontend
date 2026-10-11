@@ -163,8 +163,9 @@ export async function requireRole(
     const account = await getCurrentAccount();
 
     if (!hasRequiredRole(account.role, requiredRole)) {
-      throw redirect("/unauthorized");
-    }
+      const params = new URLSearchParams({ from: nextPath });
+      throw redirect(`/unauthorized?${params.toString()}`);
+}
 
     return account;
   } catch (error) {

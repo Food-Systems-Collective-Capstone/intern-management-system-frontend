@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Link,
@@ -9,19 +8,84 @@ import {
 import { signOut } from "~/lib/auth";
 import { ApiError } from "~/lib/api";
 import { getCurrentAccount } from "~/lib/route-auth";
-import { defaultRouteByRole } from "~/lib/roles";
+import {
+  defaultRouteByRole,
+  type AccountRole,
+} from "~/lib/roles";
 
 export function meta() {
   return [{ title: "Unauthorized | FSC Intern Management" }];
 }
 
-export async function clientLoader() {
+function getRequiredRole(path: string | null): AccountRole | null {
+  if (!path || !path.startsWith("/") || path.startsWith("//")) {
+    return null;
+  }
+
+  const pathname = path.split(/[?#]/, 1)[0];
+
+  if (
+    pathname === "/intern/workspace" ||
+    pathname === "/intern/tasks" ||
+    pathname === "/intern/weekly-progress" ||
+    /^\/intern\/tasks\/[^/]+$/.test(pathname)
+  ) {
+    return "intern";
+  }
+
+  if (
+    pathname === "/mentor/tasks/assign" ||
+    pathname === "/mentor/review"
+  ) {
+    return "mentor";
+  }
+
+  if (pathname === "/application") {
+    return "applicant";
+  }
+
+  if (
+    pathname === "/admin/applications" ||
+    pathname === "/admin/mentor-assignments"
+  ) {
+    return "admin";
+  }
+
+  return null;
+}
+
+function roleLabel(role: AccountRole): string {
+  switch (role) {
+    case "intern":
+      return "Intern";
+    case "mentor":
+      return "Mentor";
+    case "applicant":
+      return "Applicant";
+    case "admin":
+      return "Admin";
+  }
+}
+
+export async function clientLoader({
+  request,
+}: {
+  request: Request;
+}) {
+  const url = new URL(request.url);
+  const requestedPath = url.searchParams.get("from");
+  const requiredRole = getRequiredRole(requestedPath);
+
   try {
     const account = await getCurrentAccount();
 
     return {
       defaultPath: defaultRouteByRole[account.role],
       unresolved: false,
+      message:
+        requiredRole && requiredRole !== account.role
+          ? `This area is for ${roleLabel(requiredRole)}s. You're signed in as a ${roleLabel(account.role)}.`
+          : "Your account does not have permission to view this area.",
     };
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
@@ -35,6 +99,8 @@ export async function clientLoader() {
       return {
         defaultPath: null,
         unresolved: true,
+        message:
+          "Your account does not currently have an assigned workspace. Please contact your administrator if you believe this is a mistake.",
       };
     }
 
@@ -45,7 +111,7 @@ export async function clientLoader() {
 clientLoader.hydrate = true as const;
 
 export default function UnauthorizedRoute() {
-  const { defaultPath, unresolved } =
+  const { defaultPath, unresolved, message } =
     useLoaderData<typeof clientLoader>();
 
   const navigate = useNavigate();
@@ -86,9 +152,7 @@ export default function UnauthorizedRoute() {
         </h1>
 
         <p className="mt-3 text-sm text-slate-600">
-          {unresolved
-            ? "Your account does not currently have an assigned workspace. Please contact your administrator if you believe this is a mistake."
-            : "Your account does not have permission to view this area."}
+          {message}
         </p>
 
         {defaultPath && !unresolved ? (

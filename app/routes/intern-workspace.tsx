@@ -1,3 +1,4 @@
+import { WorkspaceAccountMenu } from "../components/shared/WorkspaceAccountMenu";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { apiFetch } from "../lib/api";
@@ -179,13 +180,7 @@ export default function InternWorkspace() {
             IMS
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="h-[55px] w-[55px] rounded-full bg-[#d9d9d9]" />
-
-            <span className="text-xl font-semibold tracking-[-0.4px]">
-              {currentUser?.name || "Intern"}
-            </span>
-          </div>
+          <WorkspaceAccountMenu name={currentUser?.name || "Intern"} role="Intern" />
         </header>
 
         <nav className="flex gap-2 border-b border-gray-300 bg-gray-50 px-7 py-2">

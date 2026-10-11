@@ -1,3 +1,4 @@
+import { WorkspaceAccountMenu } from "../components/shared/WorkspaceAccountMenu";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { apiFetch } from "../lib/api";
@@ -258,12 +259,7 @@ export default function InternTaskDetail() {
             IMS
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-full bg-gray-200" />
-            <span className="text-2xl font-bold">
-              {currentUser?.name || "Intern"}
-            </span>
-          </div>
+          <WorkspaceAccountMenu name={currentUser?.name || "Intern"} role="Intern" />
         </header>
 
         <nav className="flex gap-2 border-b border-gray-200 bg-gray-50 px-8 py-3">
