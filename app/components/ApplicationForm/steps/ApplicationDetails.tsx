@@ -27,7 +27,7 @@ export function ApplicationDetails({
 
       <div className="mt-7">
         <label htmlFor="internshipProgram" className={labelStyle}>
-          Internship Program *
+          Course / Program *
         </label>
 
         <input
@@ -60,7 +60,7 @@ export function ApplicationDetails({
           )}
         </div>
 
-        <Dropdown label="Expected Graduation Year *" id="graduationYear" placeholder="e.g 2027" options={["2026", "2027", "2028", "2029", "2030"].map((value) => ({ value, label: value }))} error={errors.graduationYear?.message} {...register("graduationYear")} />
+        <Dropdown label="Expected Graduation Year *" id="graduationYear" placeholder="e.g 2027" options={["Already graduated", "2026", "2027", "2028", "2029", "2030"].map((value) => ({ value, label: value }))} error={errors.graduationYear?.message} {...register("graduationYear")} />
       </div>
 
       <div className="mt-5">
