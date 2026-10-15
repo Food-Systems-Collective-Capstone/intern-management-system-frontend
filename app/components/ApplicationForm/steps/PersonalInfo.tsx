@@ -39,23 +39,41 @@ export function PersonalInfo({ register, errors }: PersonalInfoProps) {
           {...register("email")}
         />
 
-        <div>
-          <label htmlFor="phone" className={labelStyle}>
-            Phone Number *
-          </label>
+        <Input
+          label="Phone Number *"
+          id="phone"
+          type="tel"
+          placeholder="e.g 0400 000 000"
+          error={errors.phone?.message}
+          {...register("phone")}
+        />
 
-          <input
-            id="phone"
-            type="tel"
-            placeholder="e.g 0400 000 000"
-            {...register("phone")}
-            className={`mt-2 ${inputStyle}`}
-          />
+        <Input
+          label="Country *"
+          id="country"
+          placeholder="e.g Australia"
+          error={errors.country?.message}
+          {...register("country")}
+        />
 
-          {errors.phone && <p className={errorStyle}>{errors.phone.message}</p>}
-        </div>
+        <Input
+          label="Date of Birth *"
+          id="dateOfBirth"
+          type="date"
+          error={errors.dateOfBirth?.message}
+          {...register("dateOfBirth")}
+        />
 
-        <div>
+        <Input
+          label="LinkedIn Profile URL *"
+          id="linkedinUrl"
+          type="url"
+          placeholder="https://www.linkedin.com/in/your-profile"
+          error={errors.linkedinUrl?.message}
+          {...register("linkedinUrl")}
+        />
+
+        <div className="md:col-span-2">
           <label htmlFor="address" className={labelStyle}>
             Address *
           </label>
@@ -89,7 +107,20 @@ export function PersonalInfo({ register, errors }: PersonalInfoProps) {
           {errors.city && <p className={errorStyle}>{errors.city.message}</p>}
         </div>
 
-        <Dropdown label="State *" id="state" placeholder="e.g VIC" options={["VIC", "NSW", "QLD", "SA", "WA", "TAS", "ACT", "NT"].map((value) => ({ value, label: value }))} error={errors.state?.message} {...register("state")} />
+        <div>
+          <label htmlFor="state" className={labelStyle}>
+            State *
+          </label>
+
+          <input
+            id="state"
+            placeholder="e.g Victoria"
+            {...register("state")}
+            className={`mt-2 ${inputStyle}`}
+          />
+
+          {errors.state && <p className={errorStyle}>{errors.state.message}</p>}
+        </div>
 
         <div>
           <label htmlFor="postcode" className={labelStyle}>

@@ -41,6 +41,9 @@ export async function createApplication(
       lastname,
       phone: data.phone,
       email: data.email,
+      country: data.country,
+      date_of_birth: data.dateOfBirth,
+      linkedin_url: data.linkedinUrl,
       university: data.university,
       // The current backend has no internship_program field
       degree: data.internshipProgram,
