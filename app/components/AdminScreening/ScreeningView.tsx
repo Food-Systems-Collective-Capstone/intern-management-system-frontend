@@ -240,6 +240,13 @@ export function ScreeningView() {
             );
             refetch();
           }}
+          onStatusUpdated={(updatedCandidate) => {
+            setSelectedCandidate(updatedCandidate);
+            setSuccess(
+              `${updatedCandidate.firstname} ${updatedCandidate.lastname}'s status was changed to ${updatedCandidate.application_status}.`,
+            );
+            refetch();
+          }}
         />
       )}
     </main>

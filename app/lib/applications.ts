@@ -16,9 +16,12 @@ export type Candidate = {
   motivation?: string;
   degree: string;
   resume_url: string | null;
-  cover_letter_url?: string | null;
   application_status: string;
+  country?: string;
+  date_of_birth?: string;
+  linkedin_url?: string;
   created_at: string;
+  updated_at?: string;
   is_locked?: boolean;
   promoted_at?: string | null;
   promoted_by?: string | null;
@@ -85,4 +88,27 @@ export async function promoteApplicant(personId: string): Promise<Candidate> {
     { method: "PATCH" },
   );
   return response.json() as Promise<Candidate>;
+}
+
+export async function updateApplicantStatus(
+  personId: string,
+  status: string,
+): Promise<Partial<Candidate>> {
+  const response = await apiFetch(
+    `/api/applications/${encodeURIComponent(personId)}/status`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    },
+  );
+  const result: unknown = await response.json();
+  const firstResult = Array.isArray(result) ? result[0] : result;
+  const candidate = Array.isArray(firstResult) ? firstResult[0] : firstResult;
+  if (!candidate || typeof candidate !== "object") {
+    throw new Error(
+      "The status was updated, but the API returned no applicant.",
+    );
+  }
+  return candidate as Partial<Candidate>;
 }
