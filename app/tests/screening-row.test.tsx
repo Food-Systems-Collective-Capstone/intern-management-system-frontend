@@ -1,7 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Row } from "../components/AdminScreening/Table/Row";
-import { screeningStatuses } from "../components/AdminScreening/statuses";
+import {
+  editableStatuses,
+  screeningStatuses,
+} from "../components/AdminScreening/statuses";
 import type { Candidate } from "../lib/applications";
 
 describe("screening row", () => {
@@ -16,13 +19,14 @@ describe("screening row", () => {
     created_at: "2026-08-19",
   };
 
-  it("uses the four wireframe statuses and opens the selected profile", () => {
+  it("uses the four filter statuses and opens the selected profile", () => {
     expect(screeningStatuses.map((status) => status.label)).toEqual([
       "Submitted",
       "Reviewing",
       "Accepted",
       "Rejected",
     ]);
+    expect(editableStatuses).toBe(screeningStatuses);
     const onView = vi.fn();
     render(
       <table>

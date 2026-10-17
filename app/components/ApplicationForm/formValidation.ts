@@ -16,6 +16,22 @@ export const applicationSchema = z.object({
 
   phone: z.string().trim().min(1, "Phone number is required"),
 
+  country: z.string().trim().min(1, "Country is required"),
+
+  dateOfBirth: z
+    .string()
+    .min(1, "Date of birth is required")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Please enter a valid date of birth"),
+
+  linkedinUrl: z
+    .string()
+    .trim()
+    .url("Please enter a valid LinkedIn URL")
+    .regex(
+      /^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+/i,
+      "Please enter a LinkedIn profile URL beginning with https://",
+    ),
+
   address: z.string().trim().min(1, "Address is required"),
 
   city: z.string().trim().min(1, "City is required"),

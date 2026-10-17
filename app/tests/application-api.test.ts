@@ -3,6 +3,7 @@ import {
   createApplication,
   fetchApplications,
   promoteApplicant,
+  updateApplicantStatus,
   uploadResume,
 } from "../lib/applications";
 import type { ApplicationData } from "../components/ApplicationForm/formValidation";
@@ -36,6 +37,9 @@ describe("application API contract", () => {
       fullName: "Jane Doe",
       email: "jane@example.com",
       phone: "0400000000",
+      country: "Australia",
+      dateOfBirth: "2001-04-12",
+      linkedinUrl: "https://www.linkedin.com/in/jane-doe",
       address: "1 Street",
       city: "Melbourne",
       state: "VIC",
@@ -68,6 +72,9 @@ describe("application API contract", () => {
       degree: "Food safety",
       graduation_year: 2027,
       post_code: "3000",
+      country: "Australia",
+      date_of_birth: "2001-04-12",
+      linkedin_url: "https://www.linkedin.com/in/jane-doe",
     });
     const [resumeUrl, resumeInit] = fetchMock.mock.calls[1] as [
       string,
@@ -117,5 +124,46 @@ describe("application API contract", () => {
         headers: { Authorization: "Bearer jwt-token" },
       }),
     );
+  });
+
+  it("updates an applicant status through the existing PATCH endpoint", async () => {
+    const updated = {
+      person_id: "person-123",
+      application_status: "Accepted",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify(updated)));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      updateApplicantStatus("person-123", "Accepted"),
+    ).resolves.toMatchObject(updated);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend.example.com/api/applications/person-123/status",
+      expect.objectContaining({
+        method: "PATCH",
+        headers: {
+          Authorization: "Bearer jwt-token",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "Accepted" }),
+      }),
+    );
+  });
+
+  it("normalizes the deployed endpoint's array response", async () => {
+    const updated = {
+      person_id: "person-123",
+      application_status: "Rejected",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(JSON.stringify([updated]))),
+    );
+
+    await expect(
+      updateApplicantStatus("person-123", "Rejected"),
+    ).resolves.toEqual(updated);
   });
 });

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { Candidate } from "~/lib/applications";
-import { displayStatus } from "./statuses";
+import { displayStatus, editableStatuses } from "./statuses";
 import { PromoteInternModal } from "./PromoteInternModal";
+import { StatusUpdateModal } from "./StatusUpdateModal";
 
 type Tab = "profile" | "summary" | "documents";
 const tabs: { id: Tab; label: string }[] = [
@@ -10,21 +11,37 @@ const tabs: { id: Tab; label: string }[] = [
   { id: "documents", label: "Documents" },
 ];
 
+function formatDate(value?: string | null) {
+  if (!value) return "—";
+  const date = new Date(
+    /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value,
+  );
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-AU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
 export function CandidateDetails({
   candidate,
   onClose,
   onPromoted,
+  onStatusUpdated,
 }: {
   candidate: Candidate;
   onClose: () => void;
   onPromoted?: (candidate: Candidate) => void;
+  onStatusUpdated?: (candidate: Candidate) => void;
 }) {
   const [tab, setTab] = useState<Tab>("profile");
   const [showPromotion, setShowPromotion] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
-      if (event.key === "Escape" && !showPromotion) onClose();
+      if (event.key === "Escape" && !showPromotion && !pendingStatus) onClose();
       if (
         event.key === "Tab" &&
         !event.shiftKey &&
@@ -36,18 +53,13 @@ export function CandidateDetails({
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose, showPromotion]);
+  }, [onClose, pendingStatus, showPromotion]);
 
   const name = `${candidate.firstname} ${candidate.lastname}`;
-  const location = [candidate.city, candidate.state].filter(Boolean).join(", ");
-  const submitted =
-    candidate.created_at && !Number.isNaN(Date.parse(candidate.created_at))
-      ? new Intl.DateTimeFormat("en-AU", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }).format(new Date(candidate.created_at))
-      : "—";
+  const location = [candidate.city, candidate.state, candidate.country]
+    .filter(Boolean)
+    .join(", ");
+  const submitted = formatDate(candidate.created_at);
   const status = displayStatus(candidate.application_status);
   const canPromote =
     candidate.application_status === "Accepted" &&
@@ -65,7 +77,7 @@ export function CandidateDetails({
   return (
     <>
       <div
-        aria-hidden={showPromotion || undefined}
+        aria-hidden={showPromotion || pendingStatus ? true : undefined}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
         onMouseDown={(event) => {
           if (event.target === event.currentTarget) onClose();
@@ -134,8 +146,8 @@ export function CandidateDetails({
                     <dd className="mt-1">{name}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-600">Nationality</dt>
-                    <dd className="mt-1">—</dd>
+                    <dt className="text-gray-600">Country</dt>
+                    <dd className="mt-1">{candidate.country || "—"}</dd>
                   </div>
                   <div>
                     <dt className="text-gray-600">Email</dt>
@@ -143,7 +155,9 @@ export function CandidateDetails({
                   </div>
                   <div>
                     <dt className="text-gray-600">Date of birth</dt>
-                    <dd className="mt-1">—</dd>
+                    <dd className="mt-1">
+                      {formatDate(candidate.date_of_birth)}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-gray-600">Phone number</dt>
@@ -160,6 +174,23 @@ export function CandidateDetails({
                       ]
                         .filter(Boolean)
                         .join(", ") || "—"}
+                    </dd>
+                  </div>
+                  <div className="col-span-2">
+                    <dt className="text-gray-600">LinkedIn profile</dt>
+                    <dd className="mt-1 break-all">
+                      {candidate.linkedin_url ? (
+                        <a
+                          href={candidate.linkedin_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline hover:no-underline"
+                        >
+                          {candidate.linkedin_url}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
                     </dd>
                   </div>
                 </dl>
@@ -180,37 +211,104 @@ export function CandidateDetails({
                     <dd>{candidate.degree || "—"}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
+                    <dt className="font-semibold">University / Institute</dt>
+                    <dd className="text-right">
+                      {candidate.university || "—"}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="font-semibold">Graduation year</dt>
+                    <dd>{candidate.graduation_year || "—"}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
                     <dt className="font-semibold">Submitted on</dt>
                     <dd>{submitted}</dd>
+                  </div>
+                  {candidate.updated_at && (
+                    <div className="flex justify-between gap-4">
+                      <dt className="font-semibold">Last updated</dt>
+                      <dd>{formatDate(candidate.updated_at)}</dd>
+                    </div>
+                  )}
+                  <div className="min-w-0 max-w-full">
+                    <dt className="font-semibold">Motivation</dt>
+                    <dd className="mt-2 max-w-full whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-gray-700">
+                      {candidate.motivation || "—"}
+                    </dd>
                   </div>
                 </dl>
                 <h3 className="mb-3 mt-6 text-sm font-bold">Screening</h3>
                 <dl className="space-y-4 rounded-lg border border-gray-200 p-3 text-xs">
                   <div className="flex items-center justify-between gap-3">
                     <dt className="font-semibold">Status</dt>
-                    <dd
-                      className={`rounded-full px-3 py-1 ${statusClass}`}
-                      title={
-                        status === "Other"
-                          ? candidate.application_status
-                          : undefined
-                      }
-                    >
-                      {status}
+                    <dd>
+                      {onStatusUpdated ? (
+                        <>
+                          <label
+                            className="sr-only"
+                            htmlFor={`candidate-status-${candidate.person_id}`}
+                          >
+                            Status for {name}
+                          </label>
+                          <select
+                            id={`candidate-status-${candidate.person_id}`}
+                            value={candidate.application_status}
+                            disabled={candidate.is_locked}
+                            onChange={(event) => {
+                              if (
+                                event.target.value !==
+                                candidate.application_status
+                              ) {
+                                setPendingStatus(event.target.value);
+                              }
+                            }}
+                            className={`rounded-md border border-gray-300 px-3 py-2 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-60 ${statusClass}`}
+                          >
+                            {!editableStatuses.some(
+                              (item) =>
+                                item.value === candidate.application_status,
+                            ) && (
+                              <option value={candidate.application_status}>
+                                {candidate.application_status}
+                              </option>
+                            )}
+                            {editableStatuses.map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      ) : (
+                        <span
+                          className={`rounded-full px-3 py-1 ${statusClass}`}
+                        >
+                          {status}
+                        </span>
+                      )}
                     </dd>
-                    <button
-                      type="button"
-                      disabled
-                      title="Notes are not supported by the API yet"
-                      className="rounded bg-black px-2 py-2 text-white opacity-50"
-                    >
-                      Add notes
-                    </button>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <dt className="font-semibold">Notes</dt>
-                    <dd className="text-gray-500">No notes yet</dd>
+                    <dt className="font-semibold">Promoted to Intern?</dt>
+                    <dd>{candidate.is_locked ? "Yes" : "No"}</dd>
                   </div>
+                  {candidate.promoted_at && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="font-semibold">Promoted on</dt>
+                      <dd>{formatDate(candidate.promoted_at)}</dd>
+                    </div>
+                  )}
+                  {candidate.promoted_by && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="font-semibold">Promoted by</dt>
+                      <dd
+                        className="max-w-48 truncate"
+                        title={candidate.promoted_by}
+                      >
+                        {candidate.promoted_by}
+                      </dd>
+                    </div>
+                  )}
                 </dl>
               </>
             )}
@@ -218,15 +316,18 @@ export function CandidateDetails({
               <>
                 <h3 className="mb-3 text-sm font-bold">Resume</h3>
                 <div className="rounded-lg border border-gray-200 p-3 text-xs">
-                  {candidate.resume_url
-                    ? "Resume PDF on file"
-                    : "No resume uploaded"}
-                </div>
-                <h3 className="mb-3 mt-10 text-sm font-bold">Cover letter</h3>
-                <div className="rounded-lg border border-gray-200 p-3 text-xs text-gray-500">
-                  {candidate.cover_letter_url
-                    ? "Cover letter on file"
-                    : "No cover letter uploaded"}
+                  {candidate.resume_url ? (
+                    <>
+                      <span className="block font-semibold">
+                        Resume PDF on file
+                      </span>
+                      <span className="mt-1 block break-all text-gray-600">
+                        {candidate.resume_url}
+                      </span>
+                    </>
+                  ) : (
+                    "No resume uploaded"
+                  )}
                 </div>
               </>
             )}
@@ -257,6 +358,14 @@ export function CandidateDetails({
           candidate={candidate}
           onClose={() => setShowPromotion(false)}
           onPromoted={onPromoted}
+        />
+      )}
+      {pendingStatus && onStatusUpdated && (
+        <StatusUpdateModal
+          candidate={candidate}
+          status={pendingStatus}
+          onClose={() => setPendingStatus(null)}
+          onUpdated={onStatusUpdated}
         />
       )}
     </>

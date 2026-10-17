@@ -6,8 +6,10 @@ export const screeningStatuses = [
   { label: "Rejected", value: "Rejected" },
 ] as const;
 
+export const editableStatuses = screeningStatuses;
+
 export function displayStatus(status: string) {
   return (
-    screeningStatuses.find((item) => item.value === status)?.label ?? "Other"
+    editableStatuses.find((item) => item.value === status)?.label ?? "Other"
   );
 }

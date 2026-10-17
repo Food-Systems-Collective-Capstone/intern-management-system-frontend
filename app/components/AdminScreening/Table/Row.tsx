@@ -54,11 +54,7 @@ export function Row({
       </td>
       <td className="px-5 py-4">
         <span
-          title={
-            status === "Other"
-              ? `Backend status: ${candidate.application_status}`
-              : undefined
-          }
+          title={status === "Other" ? candidate.application_status : undefined}
           className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[status]}`}
         >
           {status}

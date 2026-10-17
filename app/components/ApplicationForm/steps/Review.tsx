@@ -17,6 +17,9 @@ export function Review({ data }: ReviewProps) {
         <p>Full Name: {data.fullName}</p>
         <p>Email Address: {data.email}</p>
         <p>Phone Number: {data.phone}</p>
+        <p>Country: {data.country}</p>
+        <p>Date of Birth: {data.dateOfBirth}</p>
+        <p>LinkedIn Profile: {data.linkedinUrl}</p>
         <p>Address: {data.address}</p>
         <p>City: {data.city}</p>
         <p>State: {data.state}</p>
