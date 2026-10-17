@@ -2,7 +2,6 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
 import type { ApplicationFormData } from "../formValidation";
 import { Input } from "../../Input";
-import { Dropdown } from "../../Dropdown";
 
 type PersonalInfoProps = {
   register: UseFormRegister<ApplicationFormData>;
